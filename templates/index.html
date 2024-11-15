@@ -1,3 +1,5 @@
+<!-- index.html -->
+
 {% extends 'base.html' %}
 
 {% block head %}
@@ -5,7 +7,17 @@
 {% endblock %}
 
 {% block body %}
-<h1>test</h1>
-<p>ZBI</p>
-<p>eh weeee</p>
+
+
+{% for automation in db.automations %}
+<div class="card">
+    <h3>{{ automation.name }}</h3>
+    <p><strong>Description:</strong> {{ automation.description }}</p>
+    <p><strong>Date de création:</strong> {{ automation.created_at }}</p>
+    <p><strong>Statut:</strong> <span class="status">{{ automation.status }}</span></p>
+    <p><strong>Numéro de l'automatisation:</strong> {{ automation.number }}</p>
+</div>
+{% endfor %}
+
+
 {% endblock %}
