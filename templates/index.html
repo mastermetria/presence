@@ -1,23 +1,41 @@
-<!-- index.html -->
-
 {% extends 'base.html' %}
 
 {% block head %}
+
+<meta charset="UTF-8">
 
 {% endblock %}
 
 {% block body %}
 
+<header>
+    <div class="header-info">
+        <h1>{{ db.cabinet_info.name }}</h1>
+        <p><strong>Adresse :</strong> {{ db.cabinet_info.address }}</p>
+        <p><strong>Téléphone :</strong> {{ db.cabinet_info.contact.phone }}</p>
+        <p><strong>Email :</strong> <a href="mailto:{{ db.cabinet_info.contact.email }}">{{ db.cabinet_info.contact.email }}</a></p>
+        <p><strong>Création :</strong> {{ db.cabinet_info.created_at }}</p>
+    </div>
+</header>
 
-{% for automation in db.automations %}
-<div class="card">
-    <h3>{{ automation.name }}</h3>
-    <p><strong>Description:</strong> {{ automation.description }}</p>
-    <p><strong>Date de création:</strong> {{ automation.created_at }}</p>
-    <p><strong>Statut:</strong> <span class="status">{{ automation.status }}</span></p>
-    <p><strong>Numéro de l'automatisation:</strong> {{ automation.number }}</p>
+
+
+<div class="container">
+    {% for automation in db.automations %}
+    <div class="card-container">
+        <div class="card {% if automation.status == 'active' %}active{% elif automation.status == 'inactive' %}inactive{% elif automation.status == 'problem' %}problem{% endif %}">
+            <h3>{{ automation.name }}</h3>
+            <p><strong>Description:</strong> {{ automation.description }}</p>
+            <p><strong>Date de création:</strong> {{ automation.created_at }}</p>
+            <p><strong>Statut:</strong> 
+                <span class="status {% if automation.status == 'active' %}active{% elif automation.status == 'inactive' %}inactive{% elif automation.status == 'problem' %}problem{% endif %}">
+                    {{ automation.status }}
+                </span>
+            </p>
+            <p><strong>Numéro de l'automatisation:</strong> {{ automation.number }}</p>
+        </div>
+    </div>
+    {% endfor %}
 </div>
-{% endfor %}
-
 
 {% endblock %}

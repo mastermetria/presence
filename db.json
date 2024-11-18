@@ -1,12 +1,12 @@
 {
     "cabinet_info": {
-        "name": "Présence",
+        "name": "Presence",
         "address": "Marcq en Baroeul",
         "contact": {
-            "phone": "Numéro de Téléphone",
-            "email": "Email du Cabinet"
+            "phone": "06 51 23 45 72",
+            "email": "contact@presence.fr"
         },
-        "created_at": "Date de Création du Cabinet"
+        "created_at": "02-04-2013"
     },
     "automations": [
         {
@@ -22,6 +22,28 @@
             "description": "Description de l'automatisation 2",
             "created_at": "2024-02-01",
             "status": "inactive"
+        },
+        {
+            "number": 3,
+            "name": "Nom de l'Automatisation 3",
+            "description": "Description de l'automatisation 3",
+            "created_at": "2024-01-01",
+            "status": "active"
+        },
+        {
+            "number": 4,
+            "name": "Nom de l'Automatisation 4",
+            "description": "Description de l'automatisation 4",
+            "created_at": "2024-01-01",
+            "status": "problem"
+        },
+        {
+            "number": 5,
+            "name": "Nom de l'Automatisation 5",
+            "description": "Description de l'automatisation 5",
+            "created_at": "2024-01-01",
+            "status": "active"
         }
     ]
+
 }
