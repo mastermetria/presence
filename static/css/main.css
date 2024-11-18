@@ -1,23 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+html {
+    font-family: poppins;
+    color: #f0f0f0;
+}
+
+header {
+    background: #1c1f2b;
+    border-bottom: 1px solid #2d3142;
+    width: 100%;
+    padding: 1em 0;
+    margin-bottom: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.logo {
+    width: 7%;
+    height: auto;
+    position: absolute;
+    left: 1em;
+}
+
+header h1 {
+    margin: 0;
+    text-align: center;
+    color: white;
+    flex-grow: 1;
+}
+
+.header-info {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header-info p {
+    margin: 0.5em 0;
+    font-size: 0.9em;
+    color: #a2a5b3;
+}
+
+.header-info a {
+    color: #0099ff;
+    text-decoration: none;
+}
+
+.header-info a:hover {
+    text-decoration: underline;
+}
+
+
+
+body {
+    min-height: 100vh;
+    background: #0b0d15;
+    color: #a2a5b3;
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1.5em;
+}
+
+h3, h1 {
+    color: white;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    /* gap: 10em; */
+    justify-content: center;
+}
+
 .card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    margin: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    margin: 1em auto;
+    padding: 2em;
+    width: 280px;
+    background: #1c1f2b;
+    text-align: center;
+    border-radius: 10px;
     display: inline-block;
     vertical-align: top;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 106, 255, 0.5), 
+                0 0 20px rgba(0, 0, 255, 0.4), 
+                0 0 30px rgba(255, 255, 255, 0.3), 
+                0 0 40px rgba(255, 255, 255, 0.2), 
+                0 0 50px rgba(255, 255, 255, 0.1);
 }
 
-.card h3 {
-    margin-top: 0;
+.card.active {
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5), 
+                0 0 20px rgba(0, 255, 0, 0.4), 
+                0 0 30px rgba(0, 255, 0, 0.3), 
+                0 0 40px rgba(0, 255, 0, 0.2), 
+                0 0 50px rgba(0, 255, 0, 0.1);
 }
 
-.card p {
-    margin: 8px 0;
+.card.inactive {
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.5), 
+                0 0 20px rgba(255, 255, 0, 0.4), 
+                0 0 30px rgba(255, 255, 0, 0.3), 
+                0 0 40px rgba(255, 255, 0, 0.2), 
+                0 0 50px rgba(255, 255, 0, 0.1);
 }
 
-.card .status {
+.card.problem {
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 
+                0 0 20px rgba(255, 0, 0, 0.4), 
+                0 0 30px rgba(255, 0, 0, 0.3), 
+                0 0 40px rgba(255, 0, 0, 0.2), 
+                0 0 50px rgba(255, 0, 0, 0.1);
+}
+
+
+@property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+/* .card::after, .card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    background-image: conic-gradient(from var(--angle), #006aff, #006aff, #006aff );
+    border-radius: 15px;
+    z-index: -1;
+    animation: spin 3s linear infinite;
+}
+
+.card::before {
+    filter: blur(20px);
+    opacity: 0.5;
+} */
+
+.status.active {
+    color: green;
     font-weight: bold;
-    color: #007BFF;
+}
+
+.status.inactive {
+    color: yellow;
+    font-weight: bold;
+}
+
+.status.problem {
+    color: red;
+    font-weight: bold;
+}
+
+/* @keyframes spin {
+    from {
+        --angle: 0deg;
+    }
+    to {
+        --angle: 360deg;
+    }
+} */
+
+.card-container {
+    margin-left: 50px;
+    margin-right: 50px;
 }
