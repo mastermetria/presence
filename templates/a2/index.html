@@ -1,13 +1,30 @@
 {% extends 'base.html' %}
 
 {% block head %}
-
-<meta charset="UTF-8">
-
+<title>Document</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/a2/main.css') }}">
 {% endblock %}
 
 {% block body %}
+<div class="container">
+    <header>
+        <h1 class="main-title">H1</h1>
+        <h3 class="sub-title">h3</h3>
+        <h3 class="sub-title">h3</h3>
+    </header>
 
-<h1> A2 </h1>
+    <section class="file-list">
+        <h2 class="list-title">Liste des fichiers</h2>
+        <ul>
+            {% for file in excel_list %}
+            <li class="file-item">
+                <span>{{ loop.index }}</span>
+                <span>{{ file }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    <a href="/a2/download" class="btn-download">Télécharger le dossier</a>
+    </div>
 
 {% endblock %}

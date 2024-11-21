@@ -1,7 +1,7 @@
-from openpyxl import load_workbook
 from datetime import datetime
+import time
+import pandas as pd
 import subprocess
-import openpyxl
 import shutil
 import json
 import re
@@ -10,49 +10,71 @@ import os
 USER = 'tvanderdonck'       # ftp login
 PASSWD = 'eZN7Rqd85L9q7h'   # ftp passwd
 SERVER = '13.81.52.18'      # ftp host
-URI = './automations/a2/downloads/'
+
+A2_PATH = './automations/a2/'
+DOWNLOADS_PATH = './automations/a2/downloads/'
 
 
-from openpyxl import load_workbook
-import shutil
+import json
+
+def get_last_date():
+    """
+    Lit un fichier JSON, le transforme en objet Python, et retourne 
+    la valeur de 'last_date' de la deuxième automatisation.
+    
+    :return: La valeur de 'last_date' de la deuxième automatisation
+    """
+    try:
+        # Charger le contenu du fichier JSON
+        with open('./db.json', 'r') as file:
+            data = json.load(file)
+        
+        # Accéder à la deuxième automatisation
+        second_automation = data["automations"][1]  # Index 1 pour la deuxième automatisation
+        
+        # Retourner la valeur de 'last_date'
+        return second_automation.get("last_date", "Clé 'last_date' non trouvée")
+    
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        return f"Erreur : {str(e)}"
+
 
 def file_treatment(max_nb, file_list):
-    commercial_template_path = f'{URI}commercial_template.xlsx'
-    fundraising_template_path = f'{URI}fundraising_template.xlsx'
+    
+    commercial_template_path = f'{DOWNLOADS_PATH}commercial_template.xlsx'
+    fundraising_template_path = f'{DOWNLOADS_PATH}fundraising_template.xlsx'
     name = 1
 
+    # Nom des feuilles
+    source_sheet_name = "BA Payments New"
+    dest_sheet_name = "Feuil1"
+
     for file in file_list:
-        source_file = f'{URI}{max_nb}/{file}'
-        origin_wb = load_workbook(source_file, data_only=True)
-        source_sheet = origin_wb['BA Payments New']
-        c4_value = source_sheet['C4'].value
+        source_file = f'{DOWNLOADS_PATH}{max_nb}/{file}'
+        print(source_file)
+        # Charger la feuille source
+        df = pd.read_excel(source_file, sheet_name=source_sheet_name)
 
-        template_wb = load_workbook(fundraising_template_path if c4_value == 'Fundraising' else commercial_template_path)
-        target_sheet = template_wb['Feuil1']
+        c4_value = df.iloc[3, 2]
 
-        # Copier chaque cellule non fusionnée
-        for row in source_sheet.iter_rows():
-            for cell in row:
-                # Ignorer les cellules fusionnées
-                if isinstance(cell, openpyxl.cell.cell.MergedCell):
-                    continue
-                
-                # Copier la valeur de la cellule si elle n'est pas fusionnée
-                target_sheet[cell.coordinate].value = cell.value
+        # check the type of document -- fundraising OR commercial
+        dest_path = fundraising_template_path if c4_value == 'Fundraising' else commercial_template_path
 
-        # Sauvegarder le fichier modifié
-        template_wb.save(fundraising_template_path if c4_value == 'Fundraising' else commercial_template_path)
-        
-        template_wb.close()
-        origin_wb.close()
+        # Charger le fichier destination existant
+        with pd.ExcelWriter(dest_path,engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+            # Copier le contenu dans la feuille de destination
+            df.to_excel(writer, sheet_name=dest_sheet_name, index=False)
+
 
         # Copier le fichier avec un nom unique
         shutil.copyfile(
-            fundraising_template_path if c4_value == 'Fundraising' else commercial_template_path,
-            f'{URI}{c4_value}-{str(name)}.xlsx'
+            dest_path,
+            f'{DOWNLOADS_PATH}processed/{c4_value}-{str(name)}.xlsx'
         )
 
         name += 1
+
+        time.sleep(1)
 
 
 def execute(command):  # function to execute command with subprocess
@@ -72,12 +94,11 @@ def execute(command):  # function to execute command with subprocess
 
 
 # *** Partie 1 - Récupérer les xlsx sur le serveur ftp ***
+
 def ftp_mirror():
-    print("ftp miror")
-    current_year = datetime.now().year  # set current year 
-    current_date = f"{datetime.now().year}{datetime.now().month:02}{datetime.now().day:02}"  # set current date
+    current_year = datetime.now().year  # Année actuelle
     year_folder_ls_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; ls; bye"'
-    year_folder_ls = execute(year_folder_ls_command)  # exécuter la commande
+    year_folder_ls = execute(year_folder_ls_command)  # Exécuter la commande
 
     # Traiter la sortie et récupérer le dossier le plus récent
     folder_by_date = [int(date) for date in re.findall(r'\b\d{8}\b', year_folder_ls)]
@@ -85,31 +106,34 @@ def ftp_mirror():
     last_date_folder = max(folder_by_date)
 
     global new_data_available
-    new_data_available = False  # flag initialized
+    new_data_available = False  # Initialisation du flag
 
-    # Vérifier la date du dernier dossier traité
+    # Lire la valeur de last_date depuis db.json
     try:
         with open('db.json', 'r') as file:
             data = json.load(file)
-            if int(data.get("lastdate", 0)) != last_date_folder:
-                new_data_available = True
-                day_folder_entry_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; lcd {URI}; mirror {last_date_folder}; ls; bye"'
-                execute(day_folder_entry_command)
+            last_date = data["automations"][1]["last_date"]  # Accès direct à last_date
+    except (FileNotFoundError, KeyError, IndexError, json.JSONDecodeError):
+        last_date = None  # Considérer comme non traitée si problème
 
-                # Sauvegarder la nouvelle date dans le fichier JSON
-                with open('db.json', 'w') as file_write:
-                    json.dump({"lastdate": last_date_folder}, file_write, indent=6)
-            else:
-                print("Téléchargement déjà à jour.")
-    except (json.JSONDecodeError, FileNotFoundError):
-        # Créer le fichier si inexistant ou s'il est mal formaté
+    # Comparer la date et télécharger si nécessaire
+    if last_date is None or int(last_date) != last_date_folder:
+        new_data_available = True
+        day_folder_entry_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; lcd {DOWNLOADS_PATH}; mirror {last_date_folder}; ls; bye"'
+        execute(day_folder_entry_command)
+
+        # Mettre à jour la valeur de last_date
+        data["automations"][1]["last_date"] = str(last_date_folder)
         with open('db.json', 'w') as file_write:
-            json.dump({"lastdate": last_date_folder}, file_write, indent=6)
+            json.dump(data, file_write, indent=6)
+    
 
     return last_date_folder, new_data_available
 
 
 def run():
-    print("run")
     ftp_mirror()
-    file_treatment(last_date_folder, os.listdir(f'{URI}{last_date_folder}')) if new_data_available else None
+    if new_data_available:
+        file_treatment(last_date_folder, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder}'))
+
+
