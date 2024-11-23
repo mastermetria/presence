@@ -48,7 +48,7 @@ def a1_route():
 def a2_route():    
     with open('db.json', 'r') as file:
         db_data = json.load(file)
-    
+  
     automat2()
 
     # Liste des fichiers dans le répertoire spécifié
@@ -81,7 +81,6 @@ def download_folder():
         as_attachment=True,
         download_name=zip_filename
     )
-
 
 if __name__ == '__main__':
     try:

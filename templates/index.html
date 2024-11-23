@@ -23,7 +23,7 @@
 
 <div class="container">
     {% for automation in db.automations %}
-    <div class="card-container">
+    <a href="{{automation.link}}"><div class="card-container">
         <div class="card {% if automation.status == 'active' %}active{% elif automation.status == 'inactive' %}inactive{% elif automation.status == 'problem' %}problem{% endif %}">
             <h3>{{ automation.name }}</h3>
             <p><strong>Description:</strong> {{ automation.description }}</p>
@@ -35,7 +35,7 @@
             </p>
             <p><strong>Numéro de l'automatisation:</strong> {{ automation.number }}</p>
         </div>
-    </div>
+    </div></a>
     {% endfor %}
 </div>
 

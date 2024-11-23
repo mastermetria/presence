@@ -1,79 +1,127 @@
-body {
-    font-family: Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+html {
+    font-family: 'Poppins', sans-serif;
+    color: #f0f0f0;
+    background: #0b0d15;
     margin: 0;
     padding: 0;
-    background-color: #f9f9f9;
-    color: #333;
 }
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
 
 .container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    width: 90%;
+    max-width: 1200px;
+    margin: 2em auto;
+    background: #1c1f2b;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
+
+
 
 header {
-    margin-bottom: 20px;
+    text-align: center;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #2d3142;
+    margin-bottom: 2em;
 }
 
-.main-title {
-    font-size: 24px;
-    color: #007bff;
+header .main-title {
+    font-size: 2em;
+    color: #ffffff;
     margin: 0;
 }
 
-.sub-title {
-    font-size: 18px;
-    color: #555;
-    margin: 5px 0;
+header .sub-title {
+    font-size: 1.2em;
+    color: #a2a5b3;
+    margin: 0.5em 0;
 }
 
 .file-list {
-    margin-top: 20px;
+    margin-top: 2em;
 }
 
-.list-title {
-    font-size: 20px;
-    margin-bottom: 10px;
-    text-align: center;
+.file-list .list-title {
+    font-size: 1.5em;
+    color: #ffffff;
+    margin-bottom: 1em;
 }
 
-ul {
+.file-list ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.file-item {
+.file-list .file-item {
     display: flex;
     justify-content: space-between;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    margin-bottom: 5px;
-    background-color: #f8f9fa;
+    background: #2d3142;
+    padding: 0.8em 1em;
+    margin-bottom: 0.5em;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.file-item span:first-child {
+.file-list .file-item span {
+    font-size: 1em;
+    color: #f0f0f0;
+}
+
+.file-list .file-item span:first-child {
     font-weight: bold;
-    color: #007bff;
+    color: #0099ff;
+}
+
+.file-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px; 
+    overflow-y: auto; 
+    scrollbar-width: thin; 
+    scrollbar-color: #0099ff #2d3142; 
+}
+
+.file-list ul::-webkit-scrollbar {
+    width: 8px;
+}
+
+.file-list ul::-webkit-scrollbar-thumb {
+    background-color: #0099ff; 
+    border-radius: 4px;
+}
+
+.file-list ul::-webkit-scrollbar-track {
+    background-color: #2d3142; 
 }
 
 
 .btn-download {
     display: inline-block;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
     text-decoration: none;
-    font-size: 16px;
+    padding: 0.8em 1.5em;
+    background: #0099ff;
+    color: #ffffff;
+    font-size: 1em;
     border-radius: 5px;
-    border: 1px solid #0056b3;
-    transition: background-color 0.3s ease;
+    text-align: center;
+    margin-top: 1.5em;
+    transition: background 0.3s ease;
 }
 
 .btn-download:hover {
-    background-color: #0056b3;
+    background: #007acc;
 }
