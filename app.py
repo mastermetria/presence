@@ -8,27 +8,27 @@ import json
 import threading
 import os
 
-from automations.a1.main import run as a1  # Importation des scripts d'automatisation
+from automations.a1.main import run as automat1  # Importation des scripts d'automatisation
 from automations.a2.main import run as automat2  # Importation des scripts d'automatisation
 
 app = Flask(__name__)
 
-# Fonction pour exécuter automat2
-def run_automat2():
-    print("Exécution automatique de automat2...")
-    automat2()
+# # Fonction pour exécuter automat2
+# def run_automat2():
+#     print("Exécution automatique de automat2...")
+#     automat2()
 
-# Initialisation du scheduler
-scheduler = BackgroundScheduler()
-scheduler.start()
+# # Initialisation du scheduler
+# scheduler = BackgroundScheduler()
+# scheduler.start()
 
-# Ajout d'une tâche planifiée pour exécuter automat2 toutes les 12 heures
-scheduler.add_job(
-    run_automat2,
-    trigger=IntervalTrigger(hours=12),
-    id='automat2_job',
-    replace_existing=True
-)
+# # Ajout d'une tâche planifiée pour exécuter automat2 toutes les 12 heures
+# scheduler.add_job(
+#     run_automat2,
+#     trigger=IntervalTrigger(hours=12),
+#     id='automat2_job',
+#     replace_existing=True
+# )
 
 @app.route('/')
 def index():
@@ -36,13 +36,17 @@ def index():
         db_data = json.load(file)
     return render_template('index.html', db=db_data)
 
+
 @app.route('/a1', methods=['GET', 'POST'])
 def a1_route():
     with open('db.json', 'r') as file:
         db_data = json.load(file)
 
+    automat1("130-70007550")
     pdf_list = os.listdir('automations/a1/downloads')
-    return render_template('a1/interface.html', db=db_data)
+    return render_template('a1/index.html', db=db_data)
+
+
 
 @app.route('/a2', methods=['GET'])
 def a2_route():    
@@ -87,4 +91,4 @@ if __name__ == '__main__':
     try:
         app.run(debug=True)
     except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
+        print("fin")
