@@ -42,7 +42,7 @@ def a1_route():
     with open('db.json', 'r') as file:
         db_data = json.load(file)
 
-    automat1("130-70007550")
+    automat1("130-70007551")
     pdf_list = os.listdir('automations/a1/downloads')
     return render_template('a1/index.html', db=db_data)
 
@@ -52,7 +52,7 @@ def a1_route():
 def a2_route():    
     with open('db.json', 'r') as file:
         db_data = json.load(file)
-  
+
     automat2()
 
     # Liste des fichiers dans le répertoire spécifié

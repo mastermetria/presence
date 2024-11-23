@@ -84,7 +84,7 @@ def execute(command):  # function to execute command with subprocess
             shell=True,
             capture_output=True,
             text=True,
-            timeout=10  # Ajout d'un timeout pour éviter les blocages
+            timeout=30  # Ajout d'un timeout pour éviter les blocages
         )
         return result.stdout
 
@@ -133,6 +133,7 @@ def ftp_mirror():
 
 def run():
     ftp_mirror()
+    time.sleep(3)
     if new_data_available:
         file_treatment(last_date_folder, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder}'))
 
