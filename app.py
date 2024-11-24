@@ -1,5 +1,6 @@
 from enum import auto
 from flask import Flask, render_template, request, redirect, jsonify, send_file
+from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import io
@@ -8,27 +9,21 @@ import json
 import threading
 import os
 
+
 from automations.a1.main import run as automat1  # Importation des scripts d'automatisation
 from automations.a2.main import run as automat2  # Importation des scripts d'automatisation
 
+
+# Configuration pour APScheduler
+class Config:
+    SCHEDULER_API_ENABLED = True
+
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# # Fonction pour exécuter automat2
-# def run_automat2():
-#     print("Exécution automatique de automat2...")
-#     automat2()
+scheduler = APScheduler()
 
-# # Initialisation du scheduler
-# scheduler = BackgroundScheduler()
-# scheduler.start()
-
-# # Ajout d'une tâche planifiée pour exécuter automat2 toutes les 12 heures
-# scheduler.add_job(
-#     run_automat2,
-#     trigger=IntervalTrigger(hours=12),
-#     id='automat2_job',
-#     replace_existing=True
-# )
+scheduler.init_app(app)
 
 @app.route('/')
 def index():
@@ -41,11 +36,11 @@ def index():
 def a1_route():
     with open('db.json', 'r') as file:
         db_data = json.load(file)
+        a1_db = db_data.get('automations', [])[0]
 
-    automat1("130-70007551")
+    #automat1("130-70007551")
     pdf_list = os.listdir('automations/a1/downloads')
     return render_template('a1/index.html', db=db_data)
-
 
 
 @app.route('/a2', methods=['GET'])
@@ -53,7 +48,7 @@ def a2_route():
     with open('db.json', 'r') as file:
         db_data = json.load(file)
 
-    automat2()
+    #automat2()
 
     # Liste des fichiers dans le répertoire spécifié
     try :
@@ -86,8 +81,14 @@ def download_folder():
         download_name=zip_filename
     )
 
+
+@scheduler.task('interval', id='my_task', seconds=3)
+def my_task():
+    print("Tâche exécutée toutes les 3 secondes.")
+
+scheduler.start()
+
 if __name__ == '__main__':
-    try:
-        app.run(debug=True)
-    except (KeyboardInterrupt, SystemExit):
-        print("fin")
+
+    # Lancement de l'application Flask
+    app.run(debug=True)
