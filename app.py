@@ -13,22 +13,22 @@ from automations.a2.main import run as automat2  # Importation des scripts d'aut
 
 app = Flask(__name__)
 
-# # Fonction pour exécuter automat2
-# def run_automat2():
-#     print("Exécution automatique de automat2...")
-#     automat2()
+# Fonction pour exécuter automat2
+def run_automat2():
+    print("Exécution automatique de automat2...")
+    automat2()
 
-# # Initialisation du scheduler
-# scheduler = BackgroundScheduler()
-# scheduler.start()
+# Initialisation du scheduler
+scheduler = BackgroundScheduler()
+scheduler.start()
 
-# # Ajout d'une tâche planifiée pour exécuter automat2 toutes les 12 heures
-# scheduler.add_job(
-#     run_automat2,
-#     trigger=IntervalTrigger(hours=12),
-#     id='automat2_job',
-#     replace_existing=True
-# )
+# Ajout d'une tâche planifiée pour exécuter automat2 toutes les 12 heures
+scheduler.add_job(
+    run_automat2,
+    trigger=IntervalTrigger(hours=12),
+    id='automat2_job',
+    replace_existing=True
+)
 
 @app.route('/')
 def index():
