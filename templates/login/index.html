@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<title>Document</title>
+
+{% endblock %}
+
+{% block body %}
+
+<h1>Connexion</h1>
+<form method="post">
+    <label for="password">Mot de passe :</label>
+    <input type="password" name="password" id="password" required>
+    <button type="submit">Se connecter</button>
+</form>
+<!-- Affiche le message d'erreur s'il existe -->
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+{% endblock %}

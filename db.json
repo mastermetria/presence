@@ -1,39 +1,54 @@
 {
-"cabinet_info": {
-      "name": "Presence",
-      "address": "Marcq en Baroeul",
-      "contact": {
+    "cabinet_info": {
+        "name": "Presence",
+        "address": "Marcq en Baroeul",
+        "contact": {
             "phone": "06 51 23 45 72",
             "email": "contact@presence.fr"
-      },
-      "created_at": "02-04-2013"
-},
-"automations": [
-      {
+        },
+        "created_at": "02-04-2013"
+    },
+    "automations": [
+        {
             "id": "a1",
             "name": "Afpro",
             "description": "Description de l'automatisation 1",
             "created_at": "2024-01-01",
             "status": "active",
             "link": "/a1",
-            "last_document_number": "130-70007584"
-      },
-      {
+            "logs": [
+                "2024-11-26 00:07:25.010694 - automation is currently running",
+            ],
+            "last_document_number": "130-70007585"
+        },
+        {
             "id": "a2",
             "name": "Nom de l'Automatisation 2",
             "description": "Description de l'automatisation 2",
             "created_at": "2024-02-01",
             "status": "inactive",
             "link": "/a2",
+            "logs": [
+                "2024-11-26 00:07:25.010694 - automation is currently running",
+                "2024-11-26 00:07:28.010812 - automation has finished runing",
+            ],
             "last_date": "20241117"
-      },
-      {
+        },
+        {
             "id": "test",
             "name": "test",
-            "description": "Cette automatisation a été créé dans le seul but de réaliser des tests",
+            "description": "Cette automatisation a \u00e9t\u00e9 cr\u00e9\u00e9 dans le seul but de r\u00e9aliser des tests",
             "created_at": "2024-11-24",
             "status": "active",
-            "link": "/test"
-      }
-]
+            "link": "/test",
+            "logs": [
+                "2024-11-26 00:07:25.010694 - automation is currently running",
+                "2024-11-26 00:07:28.010812 - automation has finished runing",
+                "2024-11-26 00:31:00.848168 - automation has finished runing",
+                "2024-11-26 00:07:25.010694 - automation is currently running",
+                "2024-11-26 00:07:28.010812 - automation has finished runing",
+                "2024-11-26 00:31:00.848168 - automation has finished runing"
+            ]
+        }
+    ]
 }

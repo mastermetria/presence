@@ -3,9 +3,28 @@
 {% block head %}
 <title>Document</title>
 <link rel="stylesheet" href="/static/css/a2/main.css">
+<script src="{{ url_for('static', filename='js/update_interval.js') }}" defer></script>
 {% endblock %}
 
 {% block body %}
+<div>
+    <h1>Modifier l'Intervalle de la Tâche</h1>
+    <p>Intervalle actuel de la tâche : <strong>{{ current_interval }} heures</strong></p>
+
+    <!-- Formulaire pour modifier l'intervalle -->
+    <form id="update-interval-form" data-task-id="{{ automation.id }}">
+        <label for="interval">Modifier l'intervalle :</label>
+        <select id="interval" name="interval">
+            <option value="12">12 heures</option>
+            <option value="24">24 heures</option>
+            <option value="48">48 heures</option>
+            <option value="72">72 heures</option>
+        </select>
+        <button type="submit">Mettre à jour</button>
+    </form>
+
+    <div id="response-message" style="margin-top: 10px;"></div>
+</div>
 <div class="container">
     <header>
         <a href="/" style="text-decoration: none"><h3 class="main-title">Retour à la page principale</h3></a>

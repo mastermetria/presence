@@ -4,6 +4,41 @@
 <title>Modifier l'Intervalle</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 <script src="{{ url_for('static', filename='js/update_interval.js') }}" defer></script>
+<style>
+    .terminal {
+        background-color: #1e1e1e;
+        /* Fond sombre */
+        color: #d4d4d4;
+        /* Texte gris clair pour une apparence plus sobre */
+        font-family: "Courier New", Courier, monospace;
+        /* Police monospace */
+        padding: 10px;
+        /* Espacement interne réduit */
+        border-radius: 6px;
+        /* Coins légèrement arrondis */
+        border: 1px solid #2a2a2a;
+        /* Bordure plus discrète */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        /* Ombre subtile */
+        max-height: 400px;
+        /* Hauteur maximale */
+        overflow-y: auto;
+        /* Scroll vertical si nécessaire */
+        white-space: pre-wrap;
+        /* Conserver les retours à la ligne */
+        margin: 0;
+    }
+
+    .terminal p {
+        margin: 0;
+        /* Pas d'espacement entre les paragraphes */
+        line-height: 1.2;
+        /* Hauteur de ligne réduite pour un texte plus compact */
+        font-size: 12px;
+        /* Texte plus petit */
+    }
+</style>
+
 {% endblock %}
 
 {% block body %}
@@ -24,5 +59,10 @@
     </form>
 
     <div id="response-message" style="margin-top: 10px;"></div>
+</div>
+<div class="terminal">
+    {% for log in automation.logs %}
+    <p>{{log}}</p>
+    {% endfor %}
 </div>
 {% endblock %}

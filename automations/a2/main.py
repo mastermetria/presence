@@ -7,6 +7,8 @@ import json
 import re
 import os
 
+from automations.decorator.logs import logs_history_factory
+
 USER = 'tvanderdonck'       # ftp login
 PASSWD = 'eZN7Rqd85L9q7h'   # ftp passwd
 SERVER = '13.81.52.18'      # ftp host
@@ -130,11 +132,17 @@ def ftp_mirror():
 
     return last_date_folder, new_data_available
 
-
+@logs_history_factory(1)
 def run():
     ftp_mirror()
-    time.sleep(3)
+    time.sleep(1)
     if new_data_available:
+
+        if os.path.exists(f'{DOWNLOADS_PATH}/processed'): # check if processed folder exist, if yes :
+            shutil.rmtree(f'{DOWNLOADS_PATH}/processed')  # rm -rf
+            os.makedirs(f'{DOWNLOADS_PATH}/processed')    # mkdir empty folder procesed
+
+        else :
+            os.makedirs(f'{DOWNLOADS_PATH}/processed')    # just create a new one 
+
         file_treatment(last_date_folder, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder}'))
-
-

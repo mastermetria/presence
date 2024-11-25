@@ -3,7 +3,6 @@
 {% block head %}
 
 <title>Document</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
 {% endblock %}
 
@@ -17,6 +16,11 @@
         <p><strong>Email :</strong> <a href="mailto:{{ db.cabinet_info.contact.email }}">{{
                 db.cabinet_info.contact.email }}</a></p>
         <p><strong>Création :</strong> {{ db.cabinet_info.created_at }}</p>
+    </div>
+    <div>
+        <a href="/logout">
+            <button>Déconnexion</button>
+        </a>
     </div>
 </header>
 

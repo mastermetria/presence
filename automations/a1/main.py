@@ -17,6 +17,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome  import ChromeDriverManager
 
+from automations.decorator.logs import logs_history_factory
+
+
 def add_page_with_text_to_pdf(pdf_path, document_number):
     """
     Ajoute une page en bas d'un PDF avec le texte `document_number : <document_number>`
@@ -265,6 +268,7 @@ def login(user, passwd, driver):
     login_button = driver.find_element(By.ID, 'login')
     login_button.click()
     
+@logs_history_factory(0)
 def run (document_number) :
     
     chrome_options = Options()
