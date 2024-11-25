@@ -21,28 +21,28 @@
 </header>
 
 
+    <div class="container">
+        {% for automation in db.automations %}
 
-<div class="container">
-    {% for automation in db.automations %}
-
-    <a href="{{automation.link}}">
-        <div class="card-container">
-            <div
-                class="card {% if automation.status == 'active' %}active{% elif automation.status == 'inactive' %}inactive{% elif automation.status == 'problem' %}problem{% endif %}">
-                <h3>{{ automation.name }}</h3>
-                <p><strong>Description:</strong> {{ automation.description }}</p>
-                <p><strong>Date de création:</strong> {{ automation.created_at }}</p>
-                <p><strong>Statut:</strong>
-                    <span
-                        class="status {% if automation.status == 'active' %}active{% elif automation.status == 'inactive' %}inactive{% elif automation.status == 'problem' %}problem{% endif %}">
-                        {{ automation.status }}
-                    </span>
-                </p>
-                <p><strong>Numéro de l'automatisation:</strong> {{ automation.number }}</p>
+        <a href="{{automation.link}}">
+            <div class="card-container">
+                <div
+                    class="card {% if automation.status == 'active' %}active{% elif automation.status == 'inactive' %}inactive{% elif automation.status == 'problem' %}problem{% endif %}">
+                    <h3>{{ automation.name }}</h3>
+                    <p><strong>Description:</strong> {{ automation.description }}</p>
+                    <p><strong>Date de création:</strong> {{ automation.created_at }}</p>
+                    <p><strong>Statut:</strong>
+                        <span
+                            class="status {% if automation.status == 'active' %}active{% elif automation.status == 'inactive' %}inactive{% elif automation.status == 'problem' %}problem{% endif %}">
+                            {{ automation.status }}
+                        </span>
+                    </p>
+                    <p><strong>Numéro de l'automatisation:</strong> {{ automation.number }}</p>
+                </div>
             </div>
+        </a>
+        {% endfor %}
         </div>
-    </a>
-    {% endfor %}
-</div>
+
 
 {% endblock %}

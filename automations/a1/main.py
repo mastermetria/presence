@@ -2,7 +2,13 @@ import requests
 import os
 import pyotp
 import time
+import json
+
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
 from pathlib import Path
+from io import BytesIO
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service 
 from selenium.webdriver.common.by import By
@@ -11,6 +17,40 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome  import ChromeDriverManager
 
+def add_page_with_text_to_pdf(pdf_path, document_number):
+    """
+    Ajoute une page en bas d'un PDF avec le texte `document_number : <document_number>`
+    et sauvegarde les modifications directement dans le fichier d'entrée.
+
+    Args:
+        pdf_path (str): Chemin du fichier PDF à modifier.
+        document_number (str): Numéro du document à ajouter.
+    """
+    # Lire le PDF d'entrée
+    reader = PdfReader(pdf_path)
+    writer = PdfWriter()
+
+    # Copier les pages existantes dans le writer
+    for page in reader.pages:
+        writer.add_page(page)
+
+    # Créer une nouvelle page avec le texte
+    packet = BytesIO()
+    c = canvas.Canvas(packet)
+    text = f"document_number : {document_number}"
+    c.drawString(100, 500, text)  # Position du texte sur la page
+    c.save()
+
+    # Charger la nouvelle page créée
+    packet.seek(0)
+    new_pdf = PdfReader(packet)
+    writer.add_page(new_pdf.pages[0])
+
+    # Écrire le fichier PDF modifié au même emplacement
+    with open(pdf_path, "wb") as output_file:
+        writer.write(output_file)
+
+    print(f"Nouvelle page ajoutée avec le texte : {text}")
 
 def dext_initialize(driver):
     """
@@ -225,7 +265,7 @@ def login(user, passwd, driver):
     login_button = driver.find_element(By.ID, 'login')
     login_button.click()
     
-def run (pdf_name) :
+def run (document_number) :
     
     chrome_options = Options()
     #chrome_options.add_argument('--headless=new')  # Activer le mode headless
@@ -236,7 +276,7 @@ def run (pdf_name) :
         os.mkdir('automations/a1/downloads')
     
     # ex document_number'130-70007572'
-    document_number = tuple(pdf_name.split('-'))
+    document_number = tuple(document_number.split('-'))
     base_url = 'https://afpro1.isp-online.net'
     dext_initialize(driver)
 
@@ -262,7 +302,7 @@ def run (pdf_name) :
         search_button = driver.find_element(By.ID, 'view:_id1:_id56:userEventSearch')
         search_button.click()
         driver.switch_to.window(driver.window_handles[-1])
-        try :
+        try :  
             WebDriverWait(driver, 3).until(
                 EC.presence_of_all_elements_located((By.ID, 'view:_id1:_id3:_id50:searchResults:0:tr1'))
             )
@@ -271,7 +311,7 @@ def run (pdf_name) :
             result_first_line.click()
             driver.switch_to.window(driver.window_handles[-1])
         
-            try:
+            try: # try download with first pdf viewer type
                 WebDriverWait(driver, 2).until(
                     EC.presence_of_element_located((By.TAG_NAME, 'embed'))
                 )
@@ -282,9 +322,7 @@ def run (pdf_name) :
                 with open(f"automations/a1/downloads/{'-'.join(document_number)}.pdf", 'wb') as file:
                     file.write(response.content)
 
-            
-
-            except :
+            except : # try download with second pdf viewer type
                 pdf_path = driver.execute_script("return ISP.PDF.url;")
                 response = requests.get(base_url+pdf_path)
                 with open(f"automations/a1/downloads/{'-'.join(document_number)}.pdf", 'wb') as file:
@@ -293,11 +331,23 @@ def run (pdf_name) :
 
             close_all_except_first_two(driver=driver) # and go to [0]
             absolute_path = Path(f'automations/a1/downloads/{'-'.join(document_number)}.pdf').resolve()
+            add_page_with_text_to_pdf(absolute_path, '-'.join(document_number))
+
             add_document_in_dext(driver, str(absolute_path))            
             wait_document_is_ready(driver)
             modify_invoice_number(driver, '-'.join(document_number))
             document_number = (document_number[0], str(int(document_number[1])+1)) 
             driver.switch_to.window(driver.window_handles[1])
+
+            with open('db.json', 'r') as file:
+                data = json.load(file)
+
+            data['automations'][0]['last_document_number'] = '-'.join(document_number)
+
+            with open('db.json', 'w') as file:
+                json.dump(data, file, indent=4)
+            
+            os.remove(absolute_path)
 
 
 
