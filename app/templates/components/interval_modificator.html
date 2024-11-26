@@ -1,0 +1,22 @@
+<div class="border border-white rounded p-4 bg-dark text-white" style="--bs-bg-opacity: 0.8;">
+    <!-- Titre principal -->
+    <h1 class="display-5 mb-4">Modifier l'Intervalle de la Tâche</h1>
+
+    <!-- Intervalle actuel -->
+    <p class="mb-4">Intervalle actuel de la tâche : <strong>{{ current_interval }} heures</strong></p>
+
+    <!-- Formulaire pour modifier l'intervalle -->
+    <form id="update-interval-form" data-task-id="{{ automation.id }}" class="mb-4">
+        <label for="interval" class="form-label">Modifier l'intervalle :</label>
+        <select id="interval" name="interval" class="form-select mb-3">
+            <option value="12">12 heures</option>
+            <option value="24">24 heures</option>
+            <option value="48">48 heures</option>
+            <option value="72">72 heures</option>
+        </select>
+        <button type="submit" class="btn btn-outline-light">Mettre à jour</button>
+    </form>
+
+    <!-- Message de réponse -->
+    <div id="response-message" class="mt-3"></div>
+</div>

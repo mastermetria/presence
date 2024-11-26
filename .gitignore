@@ -1,0 +1,15 @@
+venv/
+
+
+automations/a1/downloads/*
+
+
+__pycache__/
+
+*.pyc
+*.pyo
+*.pyd
+*.xls
+*.xlsx
+*.xlsm
+*.pdf
