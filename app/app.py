@@ -160,15 +160,42 @@ def download_folder():
         download_name=zip_filename
     )
 
+@app.route('/test-selenium', methods=['GET'])
+def test_selenium():
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.chrome.options import Options
+    from webdriver_manager.chrome  import ChromeDriverManager
+
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        driver.get("https://www.google.com")
+        title = driver.title  # Obtenir le titre de la page
+        driver.quit()
+        return {"success": True, "title": title}, 200
+    except Exception as e:
+        return {"success": False, "error": str(e)}, 500
 
 
-@scheduler.task('interval', id=automations[0]['id'], hours=12)
+
+
+@scheduler.task('interval', id=automations[0]['id'], seconds=30, max_instances=1, misfire_grace_time=300)
 def a1():
     automat1(automations[0]['last_document_number'])
+    print("start scheduler 1 ###################")
 
-@scheduler.task('interval', id=automations[1]['id'], hours=12)
+@scheduler.task('interval', id=automations[1]['id'], seconds=30, max_instances=1, misfire_grace_time=300)
 def a2():
     automat2()
+    print("start scheduler 2 ###################")
+
+
 
 
 

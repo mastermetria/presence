@@ -114,6 +114,8 @@ def delete_downloads_subfolders():
 
 @logs_history_factory(1)
 def run():
+    print("start run 2 !!!!!!!!!!!!!!!!!!!!")
+
     delete_downloads_subfolders()
     # Créé le repertoire
     os.makedirs(f'{DOWNLOADS_PATH}processed/')

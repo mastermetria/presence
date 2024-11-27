@@ -83,7 +83,7 @@ def dext_initialize(driver):
     code = totp.now()
 
 
-    url = 'https://app.dext.com/delta/clients/7193833621/costs/inbox'
+    url = 'https://app.dext.com/delta/clients/7193833621/'
 
     driver.get(url)
 
@@ -99,9 +99,13 @@ def dext_initialize(driver):
     for i, letter in enumerate(code) :
         otp_entry = driver.find_element(By.ID, f"otp-input-cell-{i}")
         otp_entry.send_keys(letter)
-
-    button = driver.find_element(By.XPATH, "//a[text()='Ignorer']")
-    button.click()
+    try :
+        button = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, "//a[text()='Ignorer']"))
+        )
+        button.click()
+    except :
+        driver.back()
 
 def add_document_in_dext(driver: webdriver.Chrome, path: str) :
     """
@@ -270,10 +274,10 @@ def login(user, passwd, driver):
     
 @logs_history_factory(0)
 def run (document_number) :
-    
+    print("start run 1 !!!!!!!!!!!!!!!!!!!!")
     chrome_options = Options()
-    chrome_options.add_argument('--headless=new')  # Activer le mode headless
-    chrome_options.add_argument('--no-sandbox')
+    #chrome_options.add_argument('--headless=new')  # Activer le mode headless
+    #chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 

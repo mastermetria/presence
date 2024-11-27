@@ -1,34 +1,78 @@
 {
-    "cabinet_info": {
-        "name": "Presence",
-        "address": "Marcq en Baroeul",
-        "contact": {
-            "phone": "06 51 23 45 72",
-            "email": "contact@presence.fr"
-        },
-        "created_at": "02-04-2013"
-    },
-    "automations": [
-        {
-            "id": "a1",
-            "index": "0",
-            "name": "Afpro",
-            "description": "Automatisation qui r\u00e9cup\u00e8re les factures sur afpro puis qui les mets sur dext en modifiant le num\u00e9ro de facture et qui ajoute une page au pdf avec celui-ci",
-            "created_at": "2024-01-01",
-            "status": "active",
-            "link": "/a1",
-            "logs": [],
-            "last_document_number": "130-70007585"
-        },
-        {
-            "id": "a2",
-            "index": "1",
-            "name": "Ghepardo",
-            "description": "R\u00e9cup\u00e8re automatiquement les excels et les traite sur le template. Soit fundraising ou soit commercial",
-            "created_at": "2024-02-01",
-            "status": "active",
-            "link": "/a2",
-            "logs": []
-        }
-    ]
+      "cabinet_info": {
+            "name": "Presence",
+            "address": "Marcq en Baroeul",
+            "contact": {
+                  "phone": "06 51 23 45 72",
+                  "email": "contact@presence.fr"
+            },
+            "created_at": "02-04-2013"
+      },
+      "automations": [
+            {
+                  "id": "a1",
+                  "index": "0",
+                  "name": "Afpro",
+                  "description": "Automatisation qui r\u00e9cup\u00e8re les factures sur afpro puis qui les mets sur dext en modifiant le num\u00e9ro de facture et qui ajoute une page au pdf avec celui-ci",
+                  "created_at": "2024-01-01",
+                  "status": "active",
+                  "link": "/a1",
+                  "logs": [
+                        "2024-11-27 14:43:13.726440 - RUN HAS STARTED",
+                        "2024-11-27 14:45:07.573535 - RUN HAS FINISHED",
+                        "2024-11-27 14:48:22.587409 - RUN HAS STARTED",
+                        "2024-11-27 15:00:21.644947 - RUN HAS FINISHED"
+                  ],
+                  "last_document_number": "130-70007585"
+            },
+            {
+                  "id": "a2",
+                  "index": "1",
+                  "name": "Ghepardo",
+                  "description": "R\u00e9cup\u00e8re automatiquement les excels et les traite sur le template. Soit fundraising ou soit commercial",
+                  "created_at": "2024-02-01",
+                  "status": "active",
+                  "link": "/a2",
+                  "logs": [
+                        "2024-11-27 14:12:59.155373 - RUN HAS STARTED",
+                        "2024-11-27 14:13:24.689740 - RUN HAS FINISHED",
+                        "2024-11-27 14:14:59.155204 - RUN HAS STARTED",
+                        "2024-11-27 14:15:16.279528 - RUN HAS FINISHED",
+                        "2024-11-27 14:16:59.154954 - RUN HAS STARTED",
+                        "2024-11-27 14:17:23.746569 - RUN HAS FINISHED",
+                        "2024-11-27 14:18:59.155672 - RUN HAS STARTED",
+                        "2024-11-27 14:19:16.429197 - RUN HAS FINISHED",
+                        "2024-11-27 14:22:31.784569 - RUN HAS STARTED",
+                        "2024-11-27 14:22:48.362013 - RUN HAS FINISHED",
+                        "2024-11-27 14:25:26.871793 - RUN HAS STARTED",
+                        "2024-11-27 14:25:45.251679 - RUN HAS FINISHED",
+                        "2024-11-27 14:26:26.877802 - RUN HAS STARTED",
+                        "2024-11-27 14:26:43.552226 - RUN HAS FINISHED",
+                        "2024-11-27 14:28:32.110170 - RUN HAS STARTED",
+                        "2024-11-27 14:28:50.345612 - RUN HAS FINISHED",
+                        "2024-11-27 14:29:32.115110 - RUN HAS STARTED",
+                        "2024-11-27 14:29:50.444792 - RUN HAS FINISHED",
+                        "2024-11-27 14:31:32.866009 - RUN HAS STARTED",
+                        "2024-11-27 14:31:50.935808 - RUN HAS FINISHED",
+                        "2024-11-27 14:32:32.862202 - RUN HAS STARTED",
+                        "2024-11-27 14:32:52.046387 - RUN HAS FINISHED",
+                        "2024-11-27 14:33:32.862191 - RUN HAS STARTED",
+                        "2024-11-27 14:33:50.121139 - RUN HAS FINISHED",
+                        "2024-11-27 14:34:32.861337 - RUN HAS STARTED",
+                        "2024-11-27 14:34:50.319489 - RUN HAS FINISHED",
+                        "2024-11-27 14:36:09.345066 - RUN HAS STARTED",
+                        "2024-11-27 14:36:26.606861 - RUN HAS FINISHED",
+                        "2024-11-27 14:37:57.858685 - RUN HAS STARTED",
+                        "2024-11-27 14:38:15.359829 - RUN HAS FINISHED",
+                        "2024-11-27 14:38:27.853444 - RUN HAS STARTED",
+                        "2024-11-27 14:38:45.012304 - RUN HAS FINISHED",
+                        "2024-11-27 14:39:28.685210 - RUN HAS STARTED",
+                        "2024-11-27 14:39:46.630954 - RUN HAS FINISHED",
+                        "2024-11-27 14:39:58.680091 - RUN HAS STARTED",
+                        "2024-11-27 14:40:14.989023 - RUN HAS FINISHED",
+                        "2024-11-27 14:40:28.689273 - RUN HAS STARTED",
+                        "2024-11-27 14:40:45.376855 - RUN HAS FINISHED"
+                  ]
+            }
+      ]
 }
