@@ -128,7 +128,6 @@ def a1_route():
 @app.route('/a2', methods=['GET'])
 @login_required
 def a2_route():    
-    # Liste des fichiers dans le répertoire spécifié
     try :
         excel_list = os.listdir('automations/a2/downloads/processed')
     except : 
@@ -185,11 +184,11 @@ def test_selenium():
 
 
 
-@scheduler.task('interval', id=automations[0]['id'], hours=1, max_instances=1, misfire_grace_time=300)
+@scheduler.task('interval', id=automations[0]['id'], hours=5, max_instances=1, misfire_grace_time=300)
 def a1():
     automat1(automations[0]['last_document_number'])
 
-@scheduler.task('interval', id=automations[1]['id'], hours=1, max_instances=1, misfire_grace_time=300)
+@scheduler.task('interval', id=automations[1]['id'], hours=12, max_instances=1, misfire_grace_time=300)
 def a2():
     automat2()
 

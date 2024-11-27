@@ -53,8 +53,7 @@ def add_page_with_text_to_pdf(pdf_path, document_number):
     with open(pdf_path, "wb") as output_file:
         writer.write(output_file)
 
-    print(f"Nouvelle page ajoutée avec le texte : {text}")
-
+        
 def dext_initialize(driver):
     """
     Initializes a Selenium session to log into the Dext application.
@@ -276,8 +275,8 @@ def login(user, passwd, driver):
 def run (document_number) :
     print("start run 1 !!!!!!!!!!!!!!!!!!!!")
     chrome_options = Options()
-    #chrome_options.add_argument('--headless=new')  # Activer le mode headless
-    #chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--headless=new')  # Activer le mode headless
+    chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 

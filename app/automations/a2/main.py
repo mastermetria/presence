@@ -97,31 +97,14 @@ def ftp_mirror():
         new_data_available = True
         day_folder_entry_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; lcd {DOWNLOADS_PATH}; mirror {last_date_folder}; ls; bye"'
         execute(day_folder_entry_command)
-
-def delete_downloads_subfolders():
-    downloads_path = os.path.join("automations", "a2", "downloads")
-
-    if os.path.exists(downloads_path):
-        # Parcourt les sous-dossiers dans "downloads"
-        for subfolder in os.listdir(downloads_path):
-            folder_path = os.path.join(downloads_path, subfolder)
-            if os.path.isdir(folder_path):
-                shutil.rmtree(folder_path)  # Supprime le dossier et son contenu
-                print(f"Dossier supprimé : {folder_path}")
-    else:
-        print(f"Le chemin {downloads_path} n'existe pas.")
-
-
 @logs_history_factory(1)
 def run():
-    print("start run 2 !!!!!!!!!!!!!!!!!!!!")
-
-    delete_downloads_subfolders()
-    # Créé le repertoire
-    os.makedirs(f'{DOWNLOADS_PATH}processed/')
+    print("start a2")
+    list_processed = os.listdir(f'{DOWNLOADS_PATH}processed')
+    for file in list_processed :
+        os.remove(f'{DOWNLOADS_PATH}processed/{file}')
     ftp_mirror()
     time.sleep(1)
-
 
     file_treatment(last_date_folder, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder}'))
 
