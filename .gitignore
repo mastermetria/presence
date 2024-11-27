@@ -1,7 +1,6 @@
 venv/
 
 
-automations/a1/downloads/*
 
 
 __pycache__/
@@ -10,6 +9,5 @@ __pycache__/
 *.pyo
 *.pyd
 *.xls
-*.xlsx
 *.xlsm
 *.pdf

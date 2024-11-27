@@ -185,15 +185,13 @@ def test_selenium():
 
 
 
-@scheduler.task('interval', id=automations[0]['id'], seconds=30, max_instances=1, misfire_grace_time=300)
+@scheduler.task('interval', id=automations[0]['id'], hours=1, max_instances=1, misfire_grace_time=300)
 def a1():
     automat1(automations[0]['last_document_number'])
-    print("start scheduler 1 ###################")
 
-@scheduler.task('interval', id=automations[1]['id'], seconds=30, max_instances=1, misfire_grace_time=300)
+@scheduler.task('interval', id=automations[1]['id'], hours=1, max_instances=1, misfire_grace_time=300)
 def a2():
     automat2()
-    print("start scheduler 2 ###################")
 
 
 
