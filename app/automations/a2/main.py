@@ -1,4 +1,5 @@
 from datetime import datetime
+from genericpath import isdir
 import time
 import pandas as pd
 import subprocess
@@ -100,6 +101,9 @@ def ftp_mirror():
 @logs_history_factory(1)
 def run():
     print("start a2")
+    if not os.path.isdir(f'{DOWNLOADS_PATH}processed') :
+        os.makedirs(f'{DOWNLOADS_PATH}processed', exist_ok=True)
+
     list_processed = os.listdir(f'{DOWNLOADS_PATH}processed')
     for file in list_processed :
         os.remove(f'{DOWNLOADS_PATH}processed/{file}')
