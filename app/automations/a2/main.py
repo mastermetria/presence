@@ -34,7 +34,7 @@ def file_treatment(max_nb, file_list):
         # Charger la feuille source
         df = pd.read_excel(source_file, sheet_name=source_sheet_name)
 
-        c4_value = df.iloc[3, 2]
+        c4_value = df.iloc[2, 2]
 
         # check the type of document -- fundraising OR commercial
         dest_path = fundraising_template_path if c4_value == 'Fundraising' else commercial_template_path
@@ -92,7 +92,7 @@ def ftp_mirror():
             last_date = data["automations"][1]["test"]  # Accès direct à last_date
     except (FileNotFoundError, KeyError, IndexError, json.JSONDecodeError):
         last_date = None  # Considérer comme non traitée si problème
-    print(last_date)
+
     # Comparer la date et télécharger si nécessaire
     if last_date is None or int(last_date) != last_date_folder:
         new_data_available = True
