@@ -111,4 +111,3 @@ def run():
     time.sleep(1)
 
     file_treatment(last_date_folder, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder}'))
-

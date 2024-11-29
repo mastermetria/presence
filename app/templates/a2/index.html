@@ -2,9 +2,8 @@
 
 {% block head %}
 <title>Modifier l'Intervalle</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 <script>
-    const automation_index = 1;
+        const automation_index = 0;
 </script>
 
 <script src="{{ url_for('static', filename='js/update_interval.js') }}" defer></script>
@@ -20,41 +19,29 @@
             <a href="/" class="btn btn-outline-light">Accueil</a>
         </div>
     </div>
-    <!-- Grille Bootstrap pour les deux blocs -->
-    <div class="row">
+<!-- Temps Gagné -->
+<div class="mb-4">
+    {% with time_saved=time_saved %}
+    {% include 'components/time_saved_displayer.html' %}
+    {% endwith %}
+</div>
+
+<!-- Grille Bootstrap -->
+<div class="row w-100">
         <!-- Partie gauche : Modification de l'intervalle -->
-        <div class="col-12 col-md-6 mb-4">
+        <div class="col-md-6 mb-4">
             {% with current_interval=current_interval, automation=automation %}
             {% include 'components/interval_modificator.html' %}
             {% endwith %}
         </div>
 
         <!-- Partie droite : Terminal des logs -->
-        <div class="col-12 col-md-6 mb-4">
+        <div class="col-md-6">
             {% with %}
             {% include 'components/logs_displayer.html' %}
             {% endwith %}
         </div>
     </div>
-    
-    <!-- Section liste des fichiers -->
-    <div class="row">
-        <div class="col-12">
-            <div class="border border-white rounded p-4 bg-dark text-white" style="--bs-bg-opacity: 0.8;">
-                <h3 class="mb-4">Liste des Fichiers</h3>
-                <a href="/a2/download" class="btn btn-outline-light mb-4">Télécharger le dossier</a>
-
-                <ul class="list-group">
-                    {% for file in excel_list %}
-                    <li class="list-group-item bg-dark text-white">
-                        <span>{{ loop.index }}.</span>
-                        <span>{{ file }}</span>
-                    </li>
-                    {% endfor %}
-                    </ul>
-            </div>
-            </div>
-            </div>
-            </div>
+</div>
 
 {% endblock %}

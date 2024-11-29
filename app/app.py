@@ -4,11 +4,10 @@ from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import secrets
-import zipfile
 import json
 import os
 import io
-
+import subprocess
 
 from automations.a1.main import run as automat1  # Importation des scripts d'automatisation
 from automations.a2.main import run as automat2  # Importation des scripts d'automatisation
@@ -115,14 +114,14 @@ def get_logs(automation_index):
 @login_required
 def index():
 
-    return render_template('index.html', db=db_data)
+    return render_template('index.html',total_earned_time=float(automations[0]['time_saved'])+float(automations[1]['time_saved']), db=db_data)
 
 
 @app.route('/a1', methods=['GET', 'POST'])
 @login_required
 def a1_route():
 
-    return render_template('a1/index.html', current_interval=get_current_interval(automations[0]['id']), automation=automations[0])
+    return render_template('a1/index.html',time_saved=automations[0]['time_saved'], current_interval=get_current_interval(automations[0]['id']), automation=automations[0])
 
 
 @app.route('/a2', methods=['GET'])
@@ -132,32 +131,8 @@ def a2_route():
         excel_list = os.listdir('automations/a2/downloads/processed')
     except : 
         excel_list = []
-    return render_template('a2/index.html', automation=automations[1], current_interval=get_current_interval(automations[1]['id']), excel_list=excel_list)
+    return render_template('a2/index.html',time_saved=automations[1]['time_saved'], automation=automations[1], current_interval=get_current_interval(automations[1]['id']), excel_list=excel_list)
 
-
-@app.route('/a2/download', methods=['GET'])
-@login_required
-def download_folder():
-    folder_path = 'automations/a2/downloads/processed'
-    zip_filename = 'processed_files.zip'
-
-    # Crée un objet ZIP en mémoire
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        for root, _, files in os.walk(folder_path):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, folder_path)
-                zip_file.write(file_path, arcname)
-    zip_buffer.seek(0)
-
-    # Renvoie le fichier ZIP
-    return send_file(
-        zip_buffer,
-        mimetype='application/zip',
-        as_attachment=True,
-        download_name=zip_filename
-    )
 
 @app.route('/test-selenium', methods=['GET'])
 def test_selenium():
@@ -182,15 +157,30 @@ def test_selenium():
         return {"success": False, "error": str(e)}, 500
 
 
+@app.route('/check-lftp', methods=['GET'])
+def check_lftp():
+    try:
+        # Exécute la commande 'lftp --version' pour vérifier si lftp est installé
+        result = subprocess.run(['lftp', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+            return jsonify({"status": "success", "message": "lftp is installed", "details": result.stdout.strip()})
+        else:
+            return jsonify({"status": "error", "message": "lftp is not installed or not found", "details": result.stderr.strip()})
+    except FileNotFoundError:
+        # Gestion de l'erreur si lftp n'est pas trouvé
+        return jsonify({"status": "error", "message": "lftp is not installed or not found"})
+    except Exception as e:
+        # Gestion d'autres erreurs éventuelles
+        return jsonify({"status": "error", "message": "An unexpected error occurred", "details": str(e)})
 
 
 @scheduler.task('interval', id=automations[0]['id'], hours=5, max_instances=1, misfire_grace_time=300)
 def a1():
     automat1(automations[0]['last_document_number'])
 
-@scheduler.task('interval', id=automations[1]['id'], seconds=30, max_instances=1, misfire_grace_time=300)
-def a2():
-    automat2()
+# @scheduler.task('interval', id=automations[1]['id'], seconds=30, max_instances=1, misfire_grace_time=300)
+# def a2():
+#     automat2()
 
 
 

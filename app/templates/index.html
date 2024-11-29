@@ -7,9 +7,16 @@
 {% block body %}
 <header class="mb-5">
     <!-- Bouton de déconnexion en haut à droite -->
-    <a href="/logout" class="btn btn-outline-light position-absolute top-0 end-0 m-3" role="button">
-        Déconnexion
-    </a>
+    <div class="position-relative">
+        <a href="/logout" class="btn btn-outline-light position-absolute top-0 end-0 m-3 d-none d-md-block" role="button">
+            Déconnexion
+        </a>
+        <div class="d-md-none text-center mt-3">
+            <a href="/logout" class="btn btn-outline-light" role="button">
+                Déconnexion
+            </a>
+        </div>
+        </div>
 
     <!-- Titre et informations -->
     <div class="container mt-4 text-center">
@@ -17,7 +24,7 @@
         <h1 class="text-white display-4">{{ db.cabinet_info.name }}</h1>
         <!-- Sous-titre -->
         <h4 class="text-white mb-4">{{ db.cabinet_info.address }}</h4>
-    
+
         <!-- Informations de contact côte à côte -->
         <div class="d-flex justify-content-center gap-4 flex-wrap">
             <p class="text-white m-0"><strong>Téléphone :</strong> {{ db.cabinet_info.contact.phone }}</p>
@@ -30,6 +37,19 @@
 
 <hr class="border border-white border-2 opacity-50" />
 
+<!-- Div affichant la variable total_earned_time -->
+<div class="container text-center my-4">
+    <h2 class="text-white">
+        <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
+        Temps total gagné
+        <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
+    </h2>
+
+    <p class="text-white display-5">{{ total_earned_time }}</p>
+    <p class="text-white display-">heures chaque mois</p>
+</div>
+
+<hr class="border border-white border-2 opacity-50" />
 <!-- Section des automatisations -->
 <div class="container">
     <h3 class="text-white mb-4 text-center display-3">Vos Automatisations</h3>

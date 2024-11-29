@@ -20,6 +20,13 @@
         </div>
     </div>
 
+    <!-- Temps Gagné -->
+    <div class="mb-4">
+        {% with time_saved=time_saved %}
+        {% include 'components/time_saved_displayer.html' %}
+        {% endwith %}
+    </div>
+
     <!-- Grille Bootstrap -->
     <div class="row w-100">
         <!-- Partie gauche : Modification de l'intervalle -->
