@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Portail</title>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <nav class="navbar">
+        <div class="container-fluid d-flex justify-content-end align-items-center gap-3">
+            <!-- Bouton Déconnexion -->
+            <a href="/auth/logout" class="btn btn-danger" role="button">
+                Déconnexion
+            </a>
+            <!-- Bouton Signaler un problème -->
+            <a href="#" class="btn btn-warning" role="button">
+                Signaler un problème
+            </a>
+        </div>
+    </nav>
+</div>
+
+
+<!-- Div affichant la variable total_earned_time -->
+<div class="text-center my-4 d-inline-block px-3 py-2 position-relative rounded border border-info border-3">
+    <!-- Arrière-plan semi-transparent -->
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-info rounded" style="opacity: 0.2; z-index: -1;">
+    </div>
+
+    <!-- Contenu -->
+    <h2>
+        <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
+        Temps total gagné
+        <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
+    </h2>
+
+    <p class="display-5">{{ total_earned_time }}</p>
+    <p>heures chaque mois</p>
+</div>
+
+
+
+<!-- Section des automatisations -->
+<div class="container">
+    <h3 class=" mb-4 text-center display-3">Vos Automatisations</h3>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for automation in automations %}
+        <div class="col">
+            <a href="./{{automation.link}}" class="text-decoration-none">
+                <div
+                    class="card {% if automation.status == 1 %}border-success bg-success {% elif automation.status == 0 %} border-warning bg-warning {% else %} border-danger bg-danger {% endif %} bg-opacity-50">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ automation.name }}</h5>
+                        <h6 class="card-subtitle mb-2">{{ automation.description }}</h6>
+                        <p class="card-text">{{ automation.created_at }}</p>
+                        <p class="card-text">{{ automation.status }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}
