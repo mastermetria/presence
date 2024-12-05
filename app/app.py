@@ -174,7 +174,7 @@ def check_lftp():
         return jsonify({"status": "error", "message": "An unexpected error occurred", "details": str(e)})
 
 
-@scheduler.task('interval', id=automations[0]['id'], hours=5, max_instances=1, misfire_grace_time=300)
+@scheduler.task('interval', id=automations[0]['id'], hours=12, max_instances=1, misfire_grace_time=300)
 def a1():
     automat1(automations[0]['last_document_number'])
 
