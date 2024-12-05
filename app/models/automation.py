@@ -13,6 +13,4 @@ class Automation(db.Model):
     params = db.Column(db.JSON, nullable=True)  # Champ générique pour données spécifiques
 
     logs = db.relationship('Log', backref='automation', lazy=True)
-
-    def __repr__(self):
-        return f"<Automation {self.name}>"
+    

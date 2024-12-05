@@ -3,6 +3,7 @@ FROM python:3.12-slim
 
 # Étape 2 : Installer Chrome et ses dépendances
 RUN apt-get update && apt-get install -y \
+    lftp \
     wget \
     curl \
     gnupg \
@@ -31,5 +32,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app /app
 
 # Étape 6 : Exposer le port et définir la commande de lancement
-EXPOSE 8000
-CMD ["gunicorn", "app:app", "--workers", "4", "--bind", "0.0.0.0:8000"]
+EXPOSE 5000
+
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:app"]

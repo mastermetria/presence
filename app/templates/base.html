@@ -34,6 +34,7 @@
     
     <!-- Particles.js -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    
 <!-- Iconify.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/iconify/2.0.0/iconify.min.js"></script>
 
@@ -66,7 +67,7 @@
                     }
                 },
                 "size": {
-                    "value": 2, // Taille des étoiles
+                    "value": 4, // Taille des étoiles
                     "random": true // Taille aléatoire
                 },
                 "line_linked": {
@@ -98,6 +99,13 @@
             "retina_detect": true
         });
     </script>
+    <script>
+        const modal = document.getElementById('problemModal');
+        modal.addEventListener('hidden.bs.modal', function () {
+            document.body.classList.remove('modal-open');
+        });
+    </script>
+    
 </body>
 
 </html>

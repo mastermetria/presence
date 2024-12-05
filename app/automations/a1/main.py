@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import requests
 import os
 import pyotp
@@ -18,7 +19,16 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome  import ChromeDriverManager
 
 from automations.decorator.logs import logs_history_factory
+from extensions import timer
+load_dotenv()
+# Récupérer les variables d'environnement
+AFPRO_LOGIN = os.getenv('AFPRO_LOGIN')
+AFPRO_PASSWORD = os.getenv('AFPRO_PASSWORD')
+DEXT_LOGIN = os.getenv('DEXT_LOGIN')
+DEXT_PASSWORD = os.getenv('DEXT_PASSWORD')
+DEXT_OTP_CODE = os.getenv('DEXT_OTP_CODE')
 
+APP_PORT = os.getenv('APP_PORT')
 
 def add_page_with_text_to_pdf(pdf_path, document_number):
     """
@@ -76,9 +86,8 @@ def dext_initialize(driver):
     Returns:
         None
     """
-    secret_raw = "TMZUYJORCL2PNQID"  # Remplace par ta clé réelle
 
-    totp = pyotp.TOTP(secret_raw)
+    totp = pyotp.TOTP(DEXT_OTP_CODE)
     code = totp.now()
 
 
@@ -87,10 +96,10 @@ def dext_initialize(driver):
     driver.get(url)
 
     mail = driver.find_element(By.ID, "user_login_email")
-    mail.send_keys('admin@metria.fr')
+    mail.send_keys(DEXT_LOGIN)
 
     passwd = driver.find_element(By.ID, 'user_login_password')
-    passwd.send_keys('metria123*')
+    passwd.send_keys(DEXT_PASSWORD)
 
     login = driver.find_element(By.XPATH, "//input[@type='submit']")
     login.click()
@@ -106,6 +115,7 @@ def dext_initialize(driver):
     except :
         driver.back()
 
+@timer.track(time_saved=2.0)
 def add_document_in_dext(driver: webdriver.Chrome, path: str) :
     """
     Automates the process of adding a document in the Dext application.
@@ -271,8 +281,7 @@ def login(user, passwd, driver):
     login_button = driver.find_element(By.ID, 'login')
     login_button.click()
     
-@logs_history_factory(0)
-def run (document_number) :
+def a1_run (document_number) :
     print("start run 1 !!!!!!!!!!!!!!!!!!!!")
     chrome_options = Options()
     chrome_options.add_argument('--headless=new')  # Activer le mode headless
@@ -292,7 +301,7 @@ def run (document_number) :
     # Passer au nouvel onglet
     driver.switch_to.window(driver.window_handles[1])
 
-    login('sanso', 'KAhRGyeJ6GG9Df', driver)
+    login(AFPRO_LOGIN, AFPRO_PASSWORD, driver)
 
     ###########################################################################################################
     WebDriverWait(driver, 5).until(
@@ -347,14 +356,13 @@ def run (document_number) :
             document_number = (document_number[0], str(int(document_number[1])+1)) 
             driver.switch_to.window(driver.window_handles[1])
 
-            with open('db.json', 'r') as file:
-                data = json.load(file)
 
-            data['automations'][0]['last_document_number'] = '-'.join(document_number)
 
-            with open('db.json', 'w') as file:
-                json.dump(data, file, indent=4)
-            
+            url_post = f"http://127.0.0.1:{APP_PORT}/api/automation/1/update-params"
+
+            params = {"last_document_number": document_number}  # Exemple de valeur pour 'params'
+            response_post = requests.post(url_post, json={"params": json.dumps(params)})
+            print(response_post.text)
             os.remove(absolute_path)
 
 
@@ -369,4 +377,4 @@ def run (document_number) :
 
 
 if __name__ == '__main__' :
-    run("130-70007550")
+    a1_run("130-70007550")

@@ -1,8 +1,11 @@
 from flask_migrate import current
 from db_utils import get_automation_by_id, update_automation_status
+from models import Automation # Import de ton modèle SQLAlchemy
+from automations.decorator.logs import logs_history_factory
+from extensions import timer
 
 from datetime import datetime
-from genericpath import isdir
+from dotenv import load_dotenv
 import time
 import pandas as pd
 import requests
@@ -12,12 +15,13 @@ import json
 import re
 import os
 
-from models import Automation # Import de ton modèle SQLAlchemy
-from automations.decorator.logs import logs_history_factory
+load_dotenv()
 
-USER = 'tvanderdonck'       # ftp login
-PASSWD = 'eZN7Rqd85L9q7h'   # ftp passwd
-SERVER = '13.81.52.18'      # ftp host
+
+USER = os.getenv('A2_FTP_LOGIN')      # ftp login
+PASSWD = os.getenv('A2_FTP_PASSWORD')   # ftp passwd
+SERVER = os.getenv('A2_FTP_SERVER')      # ftp host
+APP_PORT = os.getenv('APP_PORT') # app port
 
 A2_PATH = './automations/a2/'
 DOWNLOADS_PATH = './automations/a2/downloads/'
@@ -207,7 +211,7 @@ def send_data(file_path, uuid, folder):
 
         print(response.text)
 
-
+@timer.track(time_saved=900.0)
 def file_treatment(max_nb, file_list, uuid):
     
     commercial_template_path = f'{DOWNLOADS_PATH}commercial_template.xlsx'
@@ -233,7 +237,7 @@ def file_treatment(max_nb, file_list, uuid):
             # Copier le contenu dans la feuille de destination
             df.to_excel(writer, sheet_name=dest_sheet_name, index=False)
 
-        send_data(dest_path, uuid, folder)
+        # send_data(dest_path, uuid, folder)
 
 
         # Copier le fichier avec un nom unique
@@ -263,46 +267,33 @@ def execute(command):  # function to execute command with subprocess
 
 # *** Partie 1 - Récupérer les xlsx sur le serveur ftp ***
 
-def ftp_mirror():
+def ftp_mirror(current_folder):
     current_year = datetime.now().year  # Année actuelle
     year_folder_ls_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; ls; bye"'
     year_folder_ls = execute(year_folder_ls_command)  # Exécuter la commande
 
     # Traiter la sortie et récupérer le dossier le plus récent
     folder_by_date = [int(date) for date in re.findall(r'\b\d{8}\b', year_folder_ls)]
-    global last_date_folder
-    last_date_folder = max(folder_by_date)
+    last_date_folder_from_ftp = max(folder_by_date)
 
     global new_data_available
     new_data_available = False  # Initialisation du flag
 
     # Lire la valeur de last_date depuis db.json
-    try:
-        with open('db.json', 'r') as file:
-            data = json.load(file)
-            last_date = data["automations"][1]["test"]  # Accès direct à last_date
-    except (FileNotFoundError, KeyError, IndexError, json.JSONDecodeError):
-        last_date = None  # Considérer comme non traitée si problème
+    
+    last_date = current_folder
+
 
     # Comparer la date et télécharger si nécessaire
-    if last_date is None or int(last_date) != last_date_folder:
+    if last_date is None or int(last_date) != last_date_folder_from_ftp:
         new_data_available = True
-        day_folder_entry_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; lcd {DOWNLOADS_PATH}; mirror {last_date_folder}; ls; bye"'
+        day_folder_entry_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; lcd {DOWNLOADS_PATH}; mirror {last_date_folder_from_ftp}; ls; bye"'
         execute(day_folder_entry_command)
+    return last_date_folder_from_ftp
 
-def get_automat_data():
-    url = "http://127.0.0.1:5000/api/automation/2"
 
-    response = requests.get(url)
-    data = response.json()
-    params = json.loads(data.get('params'))
-    print(type(params))#<class 'str'>
-    print(params)
 
-    print("end")
-    return params
-
-def run():
+def a2_run(data):
     if not os.path.isdir(f'{DOWNLOADS_PATH}processed') :
         os.makedirs(f'{DOWNLOADS_PATH}processed', exist_ok=True)
 
@@ -310,35 +301,22 @@ def run():
     for file in list_processed :
         os.remove(f'{DOWNLOADS_PATH}processed/{file}')
     
-    data = get_automat_data()
-    if "current_folder" in data :
-        print("il y a current folder")
-        current_folder = data['current_folder']
-    else : 
-        print("ya pas current folder")
-        url_post = f"http://127.0.0.1:5000/api/automation/2/update-params"
-        current_folder = {"current_folder": 0}  # Exemple de valeur pour 'current_folder'
-        response_post = requests.post(url_post, json={"params": json.dumps(current_folder)})
-
-        if response_post.status_code == 200:
-            print("Les paramètres ont été mis à jour avec succès.")
-
-        else:
-            print(f"Erreur lors de la mise à jour des paramètres : {response_post.status_code}")
-            return None
+    
+    current_folder = data['current_folder']
         
-    ftp_mirror()
+    last_date_folder_from_ftp = ftp_mirror(current_folder)
 
     time.sleep(1)
-    if int(current_folder) < last_date_folder:
+
+    if int(current_folder) < last_date_folder_from_ftp:
 
         uuid = get_uuid()
-        file_treatment(last_date_folder, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder}'), uuid)
+
+        file_treatment(last_date_folder_from_ftp, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder_from_ftp}'), uuid)
 
 
 
-        url_post = f"http://127.0.0.1:5000/api/automation/2/update-params"
-        last_date_folder = 1
-        current_folder = {"current_folder": last_date_folder}  # Exemple de valeur pour 'current_folder'
+        url_post = f"http://127.0.0.1:{APP_PORT}/api/automation/2/update-params"
+        current_folder = {"current_folder": last_date_folder_from_ftp}  # Exemple de valeur pour 'current_folder'
         response_post = requests.post(url_post, json={"params": json.dumps(current_folder)})
         print(response_post.text)
