@@ -32,8 +32,9 @@ def home():
 def a1_route():
 
     automation = Automation.query.get(1)  # Remplace 1 par l'ID correct
-    a1_time_earned = timer.get_function_stats('a1_run')
-    return render_template('automations/auto1.html', time_saved=a1_time_earned, automation=automation)
+    job = scheduler.get_job(automation.id)
+    a1_timer = timer.get_function_stats('a1_run')
+    return render_template('automations/auto1.html', timer=a1_timer, automation=automation)
 
 
 # Route pour A2
@@ -44,13 +45,13 @@ def a2_route():
     except FileNotFoundError:
         excel_list = []
     automation = Automation.query.get(2)  # Remplace 2 par l'ID correct
-    a2_time_earned = timer.get_function_stats('a2_run')
+    a2_timer = timer.get_function_stats('a2_run')
 
-    return render_template('automations/auto2.html', time_saved=a2_time_earned, excel_list=excel_list, automation=automation)
+    return render_template('automations/auto2.html', timer=a2_timer, excel_list=excel_list, automation=automation)
 
 
 # Tâches programmées
-@scheduler.task('interval', id='automation_a1', seconds=300000, max_instances=1, misfire_grace_time=300)
+@scheduler.task('interval', id='1', hours=100, max_instances=1, misfire_grace_time=300)
 def a1_task():
     response = requests.get(F"http://localhost:{APP_PORT}/api/automation/1")
     data = response.json()  # Convertir la réponse JSON en dict
@@ -58,7 +59,7 @@ def a1_task():
 
     a1_run(params['last_document_number'])
 
-@scheduler.task('interval', id='automation_a2', seconds=50000, max_instances=1, misfire_grace_time=300)
+@scheduler.task('interval', id='2', hours=100, max_instances=1, misfire_grace_time=300)
 def a2_task():
     response = requests.get(F"http://localhost:{APP_PORT}/api/automation/2")
     data = response.json()  # Convertir la réponse JSON en dict

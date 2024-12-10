@@ -1,0 +1,12 @@
+<div class="border rounded p-4 shadow-sm"
+  style="background-color: rgba(255, 255, 255, 0.6); border-color: #dfe6ed; color: #333; height: 100%;">
+  <h3 style="color: #2c3e50; font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Moniteur</h3>
+  <div id="terminal" class="p-3 rounded overflow-auto"
+    style="height: 300px; background-color: #ecf0f1; font-family: monospace; color: #2c3e50;">
+
+    <p>temps gagné : {{timer.time_saved}}</p>
+    <p>dernière éxecution de l'automatisation : {{timer.last_run_date}}</p>
+    <p>Nombre d'éxecution avec travail : {{timer.count}}</p>
+    <!-- Les logs s'afficheront ici -->
+  </div>
+</div>

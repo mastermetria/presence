@@ -10,7 +10,6 @@
     body {
         font-family: 'Pakinsans', sans-serif;
     }
-
     #overlay {
         position: fixed;
         top: 0;
@@ -44,11 +43,9 @@
 </div>
 
 <!-- Fenêtre statique pour signaler un problème -->
-<div id="problemWindow"
-    class="position-fixed top-50 start-50 translate-middle bg-light border rounded p-4 shadow-lg d-none"
-    style="z-index: 1050; max-width: 600px; width: 100%;">
+<div id="problemWindow" class="position-fixed top-50 start-50 translate-middle bg-light border rounded p-4 shadow-lg d-none" style="z-index: 1050; max-width: 600px; width: 100%;">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Un problème, une question ? Faites-nous en part</h5>
+        <h5 class="mb-0">Un problème ? Faites-nous en part</h5>
         <button type="button" class="btn-close" id="closeProblemWindow" aria-label="Fermer"></button>
     </div>
     <p class="mb-4">Vous pouvez nous contacter par mail ou par téléphone :</p>
@@ -59,19 +56,20 @@
 
 <!-- Div affichant la variable total_earned_time -->
 <div class="d-flex justify-content-center align-items-center" style="height: 30vh;">
-    <div class="text-center px-3 py-2 position-relative w-50 rounded border border-info border-1 bg-white shadow-lg ">
+    <div class="text-center px-3 py-2 position-relative w-50 rounded border border-info border-1 bg-white shadow-lg " >
         <!-- Arrière-plan semi-transparent -->
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-info rounded" style="opacity: 0.5; z-index: -1;"></div>
-        <h2><span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span></h2>
 
         <!-- Contenu -->
         <h2>
+            <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
             Temps total gagné
-            </h2>
+            <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
+        </h2>
 
         <p class="display-5">{{ total_earned_time }}</p>
-        <p>heures depuis le {{created_at}}</p>
-        </div>
+        <p>heures chaque mois</p>
+    </div>
 </div>
 
 
@@ -81,17 +79,14 @@
     <div class="row row-cols-1 row-cols-md-2 g-4">
         {% for automation in automations %}
         <div class="col">
-            {% if automation.status == 1 %}
             <a href="./{{automation.link}}" class="text-decoration-none">
-            {% endif %}
                 <div
                     class="card {% if automation.status == 1 %}border-success bg-success {% elif automation.status == 0 %} border-warning bg-warning {% else %} border-danger bg-danger {% endif %} bg-opacity-50 shadow-lg">
                     <div class="card-body">
                         <h5 class="card-title">{{ automation.name }}</h5>
                         <h6 class="card-subtitle mb-2">{{ automation.description }}</h6>
                         <p class="card-text">{{ automation.created_at }}</p>
-                        <p class="card-text">{% if automation.status == 1 %} Actif {% elif automation.status == 0 %} Maintenance {% else %}
-                            Incactif {% endif %}</p>
+                        <p class="card-text">{{ automation.status }}</p>
                     </div>
                 </div>
             </a>
@@ -99,6 +94,7 @@
         {% endfor %}
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const overlay = document.getElementById('overlay');
@@ -115,7 +111,7 @@
         problemWindow.classList.add('d-none');
     }
 
-                                                                            overlay.addEventListener('click', closeProblemWindowHandler);
-                                                                            closeProblemWindow.addEventListener('click', closeProblemWindowHandler);
-                                                                        </script>
+    overlay.addEventListener('click', closeProblemWindowHandler);
+    closeProblemWindow.addEventListener('click', closeProblemWindowHandler);
+</script>
 {% endblock %}

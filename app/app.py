@@ -19,6 +19,7 @@ load_dotenv()
 
 DEBUG_MODE = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 APP_PORT = int(os.getenv('APP_PORT', 5000))
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 class Config:
     SCHEDULER_API_ENABLED = True
@@ -28,7 +29,7 @@ class Config:
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config.from_object(Config)
 
@@ -58,4 +59,5 @@ def index():
 
 
 if __name__ == '__main__':
+    print(DATABASE_URL)
     app.run(debug=DEBUG_MODE, port=APP_PORT)

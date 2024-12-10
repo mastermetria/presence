@@ -1,9 +1,9 @@
-from flask_migrate import current
 from db_utils import get_automation_by_id, update_automation_status
 from models import Automation # Import de ton modèle SQLAlchemy
 from automations.decorator.logs import logs_history_factory
 from extensions import timer
 
+import numpy as np
 from datetime import datetime
 from dotenv import load_dotenv
 import time
@@ -14,6 +14,9 @@ import shutil
 import json
 import re
 import os
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 load_dotenv()
 
@@ -41,7 +44,6 @@ folder_dict = {
 }
 
 JOURNAL = "TEST"
-
 
 # -- INITIALIZATION --
 def get_uuid():
@@ -81,7 +83,7 @@ def get_uuid():
 
 
 
-def extract_blocks_from_excel(file_path, sheet_name="Feuil2", bloc_column_index=3):
+def extract_blocks_from_excel(file_path, c4_value):
     """
     Extrait les blocs d'un fichier Excel basé sur une colonne spécifique.
 
@@ -93,20 +95,29 @@ def extract_blocks_from_excel(file_path, sheet_name="Feuil2", bloc_column_index=
     Returns:
         list: Liste où chaque index est un bloc, contenant les lignes du bloc.
     """
+    sheet_name = 'Feuil2'
+    bloc_column_index = 3
     # Charger le fichier Excel sans en-têtes
     df = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
-
     # Initialiser les variables pour déterminer la plage d'intérêt
     isdata = True
     max_row = 0
-
+    print(c4_value)
     # Parcourir la colonne indexée à `bloc_column_index` pour déterminer jusqu'où lire
-    while isdata:
+    while isdata and max_row < len(df):
         valeur = str(df.iloc[max_row, bloc_column_index])  # Lire la valeur
-        if re.match(r'^\d+\s+commis\. brutes$', valeur):  # Matcher le motif spécifique
-            isdata = False  # Arrêter si on trouve la valeur correspondant au motif
-        else:
-            max_row += 1  # Continuer jusqu'à trouver la fin
+        print(valeur)
+        if c4_value == 'Fundraising':
+            if re.match(r'^\d+\s+commis\. brutes$', valeur):  # Nouveau regex
+                isdata = False
+            else:
+                max_row += 1
+        elif c4_value == 'Commercial':
+            if re.match(r'^commis\. brutes$', valeur):  # Nouveau regex
+                isdata = False
+            else:
+                max_row += 1
+    print(f"max_row final : {max_row}")
 
     # Filtrer les données jusqu'à la ligne `max_row`
     filtered_df = df.iloc[:max_row]
@@ -118,7 +129,6 @@ def extract_blocks_from_excel(file_path, sheet_name="Feuil2", bloc_column_index=
     grouped_data = filtered_df.groupby(filtered_df.iloc[:, bloc_column_index])
 
     # Créer une liste où chaque index correspond à un bloc (liste de listes)
-    # Convertir toutes les valeurs en types compatibles avec JSON
     result = [
         group.astype(str).values.tolist()  # Convertir toutes les données en chaînes
         for _, group in grouped_data
@@ -126,9 +136,8 @@ def extract_blocks_from_excel(file_path, sheet_name="Feuil2", bloc_column_index=
 
     return result
 
-
-def send_data(file_path, uuid, folder):
-
+def send_data(file_path, uuid, folder, c4_value):
+    print(f"fonction send_data pour {file_path}")
     ##################################################-- CONNECT TO RIGHT folder --###############################
                                                                                                                     #
     url = "https://isuite.antaris.fr/CNX/api/v1/sessions/dossier"                                                   #
@@ -143,73 +152,14 @@ def send_data(file_path, uuid, folder):
     requests.request("POST", url, headers=headers, data=payload)                                      #
                                                                                                                     #
     ##################################################-- CONNECT TO RIGHT FOLDER --##################################
+    print("extraction des blocs..")
+    blocks = extract_blocks_from_excel(file_path, c4_value)
+    print(file_path)
+    with open('test.json', 'w') as file :
+        json.dump(blocks, file, indent=6)
+    print(file)
+    print(blocks)
 
-    blocks = extract_blocks_from_excel(file_path)
-
-    for block in blocks:
-
-        writing_line = []
-
-        for line in block:
-
-            writing_line.append({
-                "Jour": int(line[0].split('-')[2]),
-                "NumeroPiece": "",
-                "NumeroFacture": "",
-                "Compte": line[2],
-                "CodeTVA": "",
-                "Libelle": line[3],
-                "Credit": round(float(line[5]), 2) if line[5] != "nan" else 0,
-                "Debit": round(float(line[4]), 2) if line[4] != "nan" else 0,
-                "ModeReglement": "",
-                "ReferenceGed": ""
-            })
-
-        if  'F' in line[2]: # Vérifie si c'est un compte fournisseur
-            url = "https://isuite.antaris.fr/CNX/api/v1/compta/comptes/fournisseur"
-
-            payload = json.dumps({
-            "Code": line[2],
-            "Lib": " ".join(line[3].split()[1:3]),
-            "Let": "",
-            "CptHTAssocie": ""
-            })
-            headers = {
-            'accept': 'text/plain',
-            'UUID': 'GSEA6WRA91B7EKG9MYCYB4ZCT007TC',
-            'Content-Type': 'application/json'
-            }
-
-            response = requests.request("POST", url, headers=headers, data=payload)
-            print(response.text)
-
-
-        # Construire une structure JSON directement
-        data = {
-            "Journal": JOURNAL,
-            "Mois": int(line[0].split('-')[1]),
-            "Annee": int(line[0].split('-')[0]),
-            "ReferenceGed": "",
-            "LignesEcriture": writing_line,
-            "Periode": {
-                "DateDebut": "2024-12-03T07:17:52.833Z",
-                "DateFin": "2024-12-03T07:17:52.833Z"
-            }
-        }
-
-
-        url = "https://isuite.antaris.fr/CNX/api/v1/compta/ecriture"
-
-        payload = json.dumps(data)
-        headers = {
-        'accept': 'text/plain',
-        'UUID': 'GSEA6WRA91B7EKG9MYCYB4ZCT007TC',
-        'Content-Type': 'application/json'
-        }
-
-        response = requests.request("POST", url, headers=headers, data=payload)
-
-        print(response.text)
 
 @timer.track(time_saved=900.0)
 def file_treatment(max_nb, file_list, uuid):
@@ -223,8 +173,8 @@ def file_treatment(max_nb, file_list, uuid):
 
     for file in file_list:
         source_file = f'{DOWNLOADS_PATH}{max_nb}/{file}'
-        print(source_file)
         # Charger la feuille source
+
         df = pd.read_excel(source_file, sheet_name=source_sheet_name)
 
         c4_value = df.iloc[2, 2]
@@ -237,9 +187,9 @@ def file_treatment(max_nb, file_list, uuid):
             # Copier le contenu dans la feuille de destination
             df.to_excel(writer, sheet_name=dest_sheet_name, index=False)
 
-        # send_data(dest_path, uuid, folder)
-
-
+        # send_data(dest_path, uuid, folder, c4_value)
+        df = pd.read_excel(dest_path, sheet_name='Feuil2')
+        print(df)
         # Copier le fichier avec un nom unique
         shutil.copyfile(
             dest_path,
@@ -271,11 +221,9 @@ def ftp_mirror(current_folder):
     current_year = datetime.now().year  # Année actuelle
     year_folder_ls_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; ls; bye"'
     year_folder_ls = execute(year_folder_ls_command)  # Exécuter la commande
-
     # Traiter la sortie et récupérer le dossier le plus récent
     folder_by_date = [int(date) for date in re.findall(r'\b\d{8}\b', year_folder_ls)]
     last_date_folder_from_ftp = max(folder_by_date)
-
     global new_data_available
     new_data_available = False  # Initialisation du flag
 
@@ -292,8 +240,9 @@ def ftp_mirror(current_folder):
     return last_date_folder_from_ftp
 
 
-
+@timer.monitor()
 def a2_run(data):
+    print("a2_run")
     if not os.path.isdir(f'{DOWNLOADS_PATH}processed') :
         os.makedirs(f'{DOWNLOADS_PATH}processed', exist_ok=True)
 
@@ -303,20 +252,27 @@ def a2_run(data):
     
     
     current_folder = data['current_folder']
-        
     last_date_folder_from_ftp = ftp_mirror(current_folder)
 
     time.sleep(1)
 
     if int(current_folder) < last_date_folder_from_ftp:
-
+        print("start get uuid")
         uuid = get_uuid()
-
+        print(f'uuid : {uuid}')
+        print("start file treatment")
         file_treatment(last_date_folder_from_ftp, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder_from_ftp}'), uuid)
 
+        for file in os.listdir(f'{DOWNLOADS_PATH}processed'):
+
+            df = pd.read_excel(f'{DOWNLOADS_PATH}processed/{file}', sheet_name='Feuil1')
+            type_xlsx = df.iloc[1,2].upper()
 
 
-        url_post = f"http://127.0.0.1:{APP_PORT}/api/automation/2/update-params"
-        current_folder = {"current_folder": last_date_folder_from_ftp}  # Exemple de valeur pour 'current_folder'
-        response_post = requests.post(url_post, json={"params": json.dumps(current_folder)})
-        print(response_post.text)
+        # url_post = f"http://127.0.0.1:{APP_PORT}/api/automation/2/update-params"
+        # current_folder = {"current_folder": last_date_folder_from_ftp}  # Exemple de valeur pour 'current_folder'
+        # response_post = requests.post(url_post, json={"params": json.dumps(current_folder)})
+
+        # os.system(f'rm -rf {DOWNLOADS_PATH}processed')
+    else : 
+        print("deja a jour")

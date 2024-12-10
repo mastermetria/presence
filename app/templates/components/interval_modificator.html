@@ -1,22 +1,31 @@
-<div class="border border-white rounded p-4 bg-dark text-white" style="--bs-bg-opacity: 0.8;">
-    <!-- Titre principal -->
-    <h1 class="display-5 mb-4">Modifier l'Intervalle de la Tâche</h1>
+<script src="{{ url_for('static', filename='js/update_interval.js') }}" defer></script>
 
-    <!-- Intervalle actuel -->
-    <p class="mb-4">Intervalle actuel de la tâche : <strong>{{ current_interval }} heures</strong></p>
+<div class="border rounded p-4 shadow-sm"
+  style="background-color: rgba(255, 255, 255, 0.6); border-color: #dfe6ed; color: #333; height: 100%;">
+  <!-- Titre principal -->
+  <h1 class="mb-3" style="font-size: 1.5rem; font-weight: 600; color: #2c3e50;">Modifier l'Intervalle de la Tâche</h1>
 
-    <!-- Formulaire pour modifier l'intervalle -->
-    <form id="update-interval-form" data-task-id="{{ automation.id }}" class="mb-4">
-        <label for="interval" class="form-label">Modifier l'intervalle :</label>
-        <select id="interval" name="interval" class="form-select mb-3">
-            <option value="12">12 heures</option>
-            <option value="24">24 heures</option>
-            <option value="48">48 heures</option>
-            <option value="72">72 heures</option>
-        </select>
-        <button type="submit" class="btn btn-outline-light">Mettre à jour</button>
+  <!-- Intervalle actuel -->
+  <p style="font-size: 1rem; color: #2c3e50;">Intervalle actuel de la tâche : <strong id="task_interval"
+      style="color: #1abc9c;">Chargement..</strong></p>
+
+  <!-- Formulaire pour modifier l'intervalle -->
+  <form id="update-interval-form" data-task-id="{{ automation.id }}" class="mt-3">
+    <label for="interval" class="form-label" style="font-size: 1rem; color: #2c3e50;">Modifier l'intervalle :</label>
+    <select id="interval" name="interval" class="form-select mb-3" style="border-color: #dfe6ed;">
+      <option value="12">12 heures</option>
+      <option value="24">24 heures</option>
+      <option value="48">48 heures</option>
+      <option value="72">72 heures</option>
+    </select>
+    <button type="submit" class="btn btn-outline-primary" style="border-color: #1abc9c; color: #2c3e50;">Mettre à
+      jour</button>
     </form>
 
-    <!-- Message de réponse -->
-    <div id="response-message" class="mt-3"></div>
+  <!-- Message de réponse -->
+  <div id="response-message" class="mt-3" style="color: #2c3e50;"></div>
 </div>
+<script>
+  const taskId = "{{automation.id}}"; // Récupérer l'ID de la tâche depuis l'attribut HTML
+  console.log(taskId)
+</script>

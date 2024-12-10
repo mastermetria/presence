@@ -1,7 +1,8 @@
-<div class="border border-info border-1 rounded p-4 bg-white text-center bg-opacity-25 shadow-lg"
-  style="--bs-bg-opacity: 0.7">
-  <h2 class="display-6 mb-4">Temps Gagné</h2>
-  <p class="mb-0">
-    Vous avez économisé : <strong>{{ time_saved['time_saved'] }} heures</strong>
+<div class="border rounded p-4 text-center shadow-sm"
+  style="background-color: rgba(255, 255, 255, 0.6); border-color: #dfe6ed; color: #333;">
+  <h2 class="mb-3" style="font-size: 1.5rem; font-weight: 600; color: #2c3e50;">Temps Gagné</h2>
+  <p style="margin: 0; font-size: 1rem; color: #2c3e50;">
+    Vous avez économisé : <strong style="color: #1abc9c;">{{ timer.time_saved }} heures</strong>
+    depuis le {{timer.created_at}}
   </p>
 </div>

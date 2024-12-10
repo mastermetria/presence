@@ -1,6 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('update-interval-form');
-    const taskId = form.getAttribute('data-task-id'); // Récupérer l'ID de la tâche depuis l'attribut HTML
+
+    // Fonction pour récupérer les jours depuis l'API et les afficher
+    const fetchTaskInterval = async () => {
+        try {
+            const response = await fetch(`/scheduler/jobs/${taskId}`);
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des jours');
+            }
+
+            const data = await response.json();
+            const days = data.days;
+            const intervalSpan = document.getElementById('task_interval');
+
+            if (intervalSpan) {
+                intervalSpan.textContent = `${days} jours`;
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+        }
+    };
+
+    // Appel de la fonction au chargement de la page
+    await fetchTaskInterval();
 
     form.addEventListener('submit', async function (event) {
         event.preventDefault();

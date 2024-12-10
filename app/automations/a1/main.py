@@ -18,8 +18,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome  import ChromeDriverManager
 
-from automations.decorator.logs import logs_history_factory
 from extensions import timer
+
 load_dotenv()
 # Récupérer les variables d'environnement
 AFPRO_LOGIN = os.getenv('AFPRO_LOGIN')
@@ -27,6 +27,7 @@ AFPRO_PASSWORD = os.getenv('AFPRO_PASSWORD')
 DEXT_LOGIN = os.getenv('DEXT_LOGIN')
 DEXT_PASSWORD = os.getenv('DEXT_PASSWORD')
 DEXT_OTP_CODE = os.getenv('DEXT_OTP_CODE')
+FLASK_DEBUG = os.getenv('FLASK_DEBUG')
 
 APP_PORT = os.getenv('APP_PORT')
 
@@ -280,19 +281,22 @@ def login(user, passwd, driver):
 
     login_button = driver.find_element(By.ID, 'login')
     login_button.click()
-    
+
+@timer.monitor() 
 def a1_run (document_number) :
     print("start run 1 !!!!!!!!!!!!!!!!!!!!")
     chrome_options = Options()
-    chrome_options.add_argument('--headless=new')  # Activer le mode headless
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-dev-shm-usage')
+    if not FLASK_DEBUG :
+        chrome_options.add_argument('--headless=new')  # Activer le mode headless
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     if not os.path.isdir('automations/a1/downloads/'):
         os.mkdir('automations/a1/downloads')
     
     # ex document_number'130-70007572'
+    print(type(document_number))
     document_number = tuple(document_number.split('-'))
     base_url = 'https://afpro1.isp-online.net'
     dext_initialize(driver)
@@ -360,8 +364,8 @@ def a1_run (document_number) :
 
             url_post = f"http://127.0.0.1:{APP_PORT}/api/automation/1/update-params"
 
-            params = {"last_document_number": document_number}  # Exemple de valeur pour 'params'
-            response_post = requests.post(url_post, json={"params": json.dumps(params)})
+            params = {"last_document_number": "-".join(document_number)}  # Exemple de valeur pour 'params'
+            response_post = requests.post(url_post, json={"params": params})
             print(response_post.text)
             os.remove(absolute_path)
 
