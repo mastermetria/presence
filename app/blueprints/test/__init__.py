@@ -25,7 +25,6 @@ def a1():
     data = response.json()  # Convertir la réponse JSON en dict
     # Vérifier si 'params' est une chaîne ou un dict
     params = data['params']
-    print("depuis test"+type(params['last_document_number']))
 
     if isinstance(params, str):  # Si c'est une chaîne, la convertir en dict
         params = ast.literal_eval(params)

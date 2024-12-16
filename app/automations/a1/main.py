@@ -283,8 +283,7 @@ def login(user, passwd, driver):
     login_button.click()
 
 @timer.monitor() 
-def a1_run (document_number) :
-    print("start run 1 !!!!!!!!!!!!!!!!!!!!")
+def a1_run (data) :
     chrome_options = Options()
     if not FLASK_DEBUG :
         chrome_options.add_argument('--headless=new')  # Activer le mode headless
@@ -296,8 +295,7 @@ def a1_run (document_number) :
         os.mkdir('automations/a1/downloads')
     
     # ex document_number'130-70007572'
-    print(type(document_number))
-    document_number = tuple(document_number.split('-'))
+    document_number = tuple(data.split('-'))
     base_url = 'https://afpro1.isp-online.net'
     dext_initialize(driver)
 
@@ -316,7 +314,8 @@ def a1_run (document_number) :
         invoice_number_input = driver.find_element(By.ID, 'view:_id1:_id56:InvoiceNumber')
         invoice_number_input.clear()
         invoice_number_input.send_keys('-'.join(document_number))
-
+        print(f"DOCUMENT NUMBER : {document_number}")
+        time.sleep(3)
         WebDriverWait(driver, 5).until(
             EC.presence_of_all_elements_located((By.ID, 'view:_id1:_id56:userEventSearch'))
         )
