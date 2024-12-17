@@ -111,7 +111,7 @@ def create_provider_account(uuid, code, lib):
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
-    print(response.text)
+    print(f"Création compte fournisseur : {response.text}")
 
 def create_account(uuid, code, lib):
     url = "https://isuite.antaris.fr/CNX/api/v1/compta/comptes/generaux"
@@ -130,7 +130,7 @@ def create_account(uuid, code, lib):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-    print(response.text)
+    print(f"Création compte général : {response.text}")
 
 def verif_campaign_name(campaign_name, uuid):
     """
@@ -152,17 +152,34 @@ def verif_campaign_name(campaign_name, uuid):
         # Ajouter la nouvelle entrée au dictionnaire
         feuil3_dict[campaign_name] = (new_value_1, new_value_2)
 
-    create_account(uuid, new_value_1, campaign_name)
-    create_account(uuid, new_value_2, campaign_name)
+        create_account(uuid, new_value_1, campaign_name)
+        create_account(uuid, new_value_2, campaign_name)
+    else : 
+        create_account(uuid, feuil3_dict[campaign_name][1], campaign_name)
+        create_account(uuid, feuil3_dict[campaign_name][0], campaign_name)
 
     return feuil3_dict[campaign_name]
+
+def send_data(uuid, data):
+    url = "https://isuite.antaris.fr/CNX/api/v1/compta/ecriture"
+
+    payload = json.dumps(data)
+    headers = {
+    'accept': 'text/plain',
+    'UUID': uuid,
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(f"Envoie des écritures : {response.text}")
+
 
 def file_treatment(max_nb, file_list, uuid):
     
     for file in file_list[-2:-1]:
         print(f'file name : {file}')
-        # df = pd.read_excel(f'{DOWNLOADS_PATH}{max_nb}/{file}',sheet_name='BA Payments New', header=None)
-        df = pd.read_excel(f'{DOWNLOADS_PATH}commercial_template.xlsx',sheet_name='Feuil1', header=None)
+        df = pd.read_excel(f'{DOWNLOADS_PATH}{max_nb}/{file}',sheet_name='BA Payments New', header=None)
 
         date = df.iloc[0, 2].strftime("%m/%d/%Y")
         mc_name = df.iloc[2, 2].strip().upper()
@@ -177,12 +194,24 @@ def file_treatment(max_nb, file_list, uuid):
 
         if not df_filtered.empty :
             
-            # connect_to_folder(uuid, mc_name)
-            # verif_campaign_name(campaign_name, uuid)
+            connect_to_folder(uuid, mc_name)
+            verif_campaign_name(campaign_name, uuid)
+
+            body = {
+                "Journal": folder_dict[mc_name][1],
+                "Mois": int(date.split('/')[0]),
+                "Annee": int(date.split('/')[2]),
+                "ReferenceGed": "",
+                "LignesEcriture": data,
+                "Periode": {
+                    "DateDebut": "2024-12-03T07:17:52.833Z",
+                    "DateFin": "2024-12-03T07:17:52.833Z"
+                    }
+            }
 
             if campaign_type == 'FUNDRAISING':
                 provision_line1= {
-                    "Jour": date.split('/')[0],
+                    "Jour": int(date.split('/')[1]),
                     "NumeroPiece": "",
                     "NumeroFacture": "",
                     "Compte": feuil3_dict[campaign_name][1],
@@ -194,7 +223,7 @@ def file_treatment(max_nb, file_list, uuid):
                     "ReferenceGed": ""
                     }
                 provision_line2= {
-                    "Jour": date.split('/')[0],
+                    "Jour": int(date.split('/')[1]),
                     "NumeroPiece": "",
                     "NumeroFacture": "",
                     "Compte": feuil3_dict[campaign_name][0],
@@ -206,158 +235,159 @@ def file_treatment(max_nb, file_list, uuid):
                     "ReferenceGed": ""
                     }
                 data.extend([provision_line1, provision_line2])
+                send_data(uuid, body)
+                data.clear()
+            
             for _, row in df_filtered.iterrows():
-                # create_provider_account(uuid, f'F000{row.iloc[col_to_num('C')]}')
+
+                create_provider_account(uuid, f'F000{row.iloc[col_to_num('C')]}', row.iloc[col_to_num('D')])
+
                 if campaign_type == 'FUNDRAISING':
                     fundraising_line1= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": feuil3_dict[campaign_name][0],
                         "CodeTVA": "",
                         "Libelle": f"{row.iloc[col_to_num('C')]} {row.iloc[col_to_num('D')]} commis. brutes",
                         "Credit": 0,
-                        "Debit": (0 if isinstance(row.iloc[col_to_num('AC')], str) or pd.isna(row.iloc[col_to_num('AC')]) else row.iloc[col_to_num('AC')]) + \
-                                (0 if isinstance(row.iloc[col_to_num('AK')], str)  or pd.isna(row.iloc[col_to_num('AK')]) else row.iloc[col_to_num('AK')]) + \
-                                (0 if isinstance(row.iloc[col_to_num('AL')], str)  or pd.isna(row.iloc[col_to_num('AL')]) else row.iloc[col_to_num('AL')]),
+                        "Debit": (0 if isinstance(row.iloc[col_to_num('AC')], str) or pd.isna(row.iloc[col_to_num('AC')]) else round(row.iloc[col_to_num('AC')], 2)) + \
+                                (0 if isinstance(row.iloc[col_to_num('AK')], str)  or pd.isna(row.iloc[col_to_num('AK')]) else round(row.iloc[col_to_num('AK')], 2)) + \
+                                (0 if isinstance(row.iloc[col_to_num('AL')], str)  or pd.isna(row.iloc[col_to_num('AL')]) else round(row.iloc[col_to_num('AL')], 2)),
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     fundraising_line2= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": feuil3_dict[campaign_name][1],
                         "CodeTVA": "",
                         "Libelle": f"{row.iloc[col_to_num('C')]} {row.iloc[col_to_num('D')]} commis. brutes",
-                        "Credit": -row.iloc[col_to_num('AJ')] -row.iloc[col_to_num('AH')] if row.iloc[col_to_num('AJ')]< 0 else 0,
-                        "Debit": row.iloc[col_to_num('AJ')] -row.iloc[col_to_num('AH')] if row.iloc[col_to_num('AJ')]> 0  else 0,
+                        "Credit": round(-row.iloc[col_to_num('AJ')] -row.iloc[col_to_num('AH')], 2) if row.iloc[col_to_num('AJ')]< 0 else 0,
+                        "Debit": round(row.iloc[col_to_num('AJ')] -row.iloc[col_to_num('AH')], 2) if row.iloc[col_to_num('AJ')]> 0  else 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     fundraising_line3= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": "437600000",
                         "CodeTVA": "",
                         "Libelle": f"{row.iloc[col_to_num('C')]} {row.iloc[col_to_num('D')]} commis. brutes",
-                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AO')]) else -row.iloc[col_to_num('AO')],
+                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AO')]) else round(-row.iloc[col_to_num('AO')], 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     fundraising_line4= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": "791000000",
                         "CodeTVA": "",
                         "Libelle": f"{row.iloc[col_to_num('C')]} {row.iloc[col_to_num('D')]} commis. brutes",
-                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AP')]) else-row.iloc[col_to_num('AP')]/1.2,
+                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AP')]) else round(-row.iloc[col_to_num('AP')]/1.2, 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     fundraising_line5= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": "445717000",
                         "CodeTVA": "",
                         "Libelle": f"{row.iloc[col_to_num('C')]} {row.iloc[col_to_num('D')]} commis. brutes",
-                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AP')]) else -row.iloc[col_to_num('AP')]/1.2*0.2,
+                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AP')]) else round(-row.iloc[col_to_num('AP')]/1.2*0.2, 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     fundraising_line6= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": f"F000{row.iloc[col_to_num('C')]}",
                         "CodeTVA": "",
                         "Libelle": f"{row.iloc[col_to_num('C')]} {row.iloc[col_to_num('D')]} commis. brutes",
-                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AS')]) else row.iloc[col_to_num('AS')],
+                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AS')]) else round(row.iloc[col_to_num('AS')], 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     
                     data.extend([fundraising_line1, fundraising_line2, fundraising_line3, fundraising_line4, fundraising_line5, fundraising_line6])
-                    #send
-                    
-                    # data.clear()
+                    send_data(uuid, body)
+                    data.clear()
+
                 elif campaign_type == 'COMMERCIAL':
                     commercial_line1= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": feuil3_dict[campaign_name][0],
                         "CodeTVA": "",
                         "Libelle": f"{row[col_to_num('C')]} {row[col_to_num('D')]} commis. brutes",
                         "Credit": 0,
-                        "Debit": (0 if isinstance(row.iloc[col_to_num('AH')], str) or pd.isna(row.iloc[col_to_num('AH')]) else row.iloc[col_to_num('AH')]) + \
-                                (0 if isinstance(row.iloc[col_to_num('AI')], str)  or pd.isna(row.iloc[col_to_num('AI')]) else row.iloc[col_to_num('AI')]) + \
-                                (0 if isinstance(row.iloc[col_to_num('AJ')], str)  or pd.isna(row.iloc[col_to_num('AJ')]) else row.iloc[col_to_num('AJ')]),
+                        "Debit": (0 if isinstance(row.iloc[col_to_num('AH')], str) or pd.isna(row.iloc[col_to_num('AH')]) else round(row.iloc[col_to_num('AH')], 2)) + \
+                                (0 if isinstance(row.iloc[col_to_num('AI')], str)  or pd.isna(row.iloc[col_to_num('AI')]) else round(row.iloc[col_to_num('AI')], 2)) + \
+                                (0 if isinstance(row.iloc[col_to_num('AJ')], str)  or pd.isna(row.iloc[col_to_num('AJ')]) else round(row.iloc[col_to_num('AJ')], 2)),
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     commercial_line2= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": "437600000",
                         "CodeTVA": "",
                         "Libelle": f"{row[col_to_num('C')]} {row[col_to_num('D')]} commis. brutes",
-                        "Credit":  0 if pd.isna(row.iloc[col_to_num('AM')]) else -row.iloc[col_to_num('AM')],
+                        "Credit":  0 if pd.isna(row.iloc[col_to_num('AM')]) else round(-row.iloc[col_to_num('AM')], 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     commercial_line3= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": "791000000",
                         "CodeTVA": "",
                         "Libelle": f"{row[col_to_num('C')]} {row[col_to_num('D')]} commis. brutes",
-                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AN')]) else -row.iloc[col_to_num('AP')]/1.2,
+                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AN')]) else round(-row.iloc[col_to_num('AP')]/1.2, 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     commercial_line4= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": "445717000",
                         "CodeTVA": "",
                         "Libelle": f"{row[col_to_num('C')]} {row[col_to_num('D')]} commis. brutes",
-                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AN')]) else -row.iloc[col_to_num('AP')]/1.2*0.2,
+                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AN')]) else round(-row.iloc[col_to_num('AP')]/1.2*0.2, 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     commercial_line5= {
-                        "Jour": date.split('/')[0],
+                        "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
                         "Compte": f"F000{row.iloc[col_to_num('C')]}",
                         "CodeTVA": "",
                         "Libelle": f"{row[col_to_num('C')]} {row[col_to_num('D')]} commis. brutes",
-                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AQ')]) else row.iloc[col_to_num('AQ')],
+                        "Credit": 0 if pd.isna(row.iloc[col_to_num('AQ')]) else round(row.iloc[col_to_num('AQ')], 2),
                         "Debit": 0,
                         "ModeReglement": "",
                         "ReferenceGed": ""
                         }
                     data.extend([commercial_line1, commercial_line2, commercial_line3, commercial_line4, commercial_line5])
-                    #send
-                    # data.clear()
-
-            with open('test.json', 'w',  encoding='utf8') as file:
-                    print("envoie json")
-                    json.dump(data, file, indent=6, ensure_ascii=False)
+                    send_data(uuid, body)
+                    data.clear()
 
         else : 
             print("fichier pas a traiter")
@@ -380,26 +410,17 @@ def execute(command):  # function to execute command with subprocess
         return "Error"
 
 
-def ftp_mirror():
+def ftp_mirror(last_date):
     current_year = datetime.now().year  # Année actuelle
     year_folder_ls_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; ls; bye"'
     year_folder_ls = execute(year_folder_ls_command)  # Exécuter la commande
 
     # Traiter la sortie et récupérer le dossier le plus récent
     folder_by_date = [int(date) for date in re.findall(r'\b\d{8}\b', year_folder_ls)]
-    global last_date_folder
     last_date_folder = max(folder_by_date)
 
-    global new_data_available
-    new_data_available = False  # Initialisation du flag
 
-    # Lire la valeur de last_date depuis db.json
-    try:
-        with open('db.json', 'r') as file:
-            data = json.load(file)
-            last_date = data["automations"][1]["test"]  # Accès direct à last_date
-    except (FileNotFoundError, KeyError, IndexError, json.JSONDecodeError):
-        last_date = None  # Considérer comme non traitée si problème
+
 
     # Comparer la date et télécharger si nécessaire
     if last_date is None or int(last_date) != last_date_folder:
@@ -407,12 +428,28 @@ def ftp_mirror():
         day_folder_entry_command = f'lftp -u {USER},{PASSWD} ftps://{SERVER} -e "set ssl:verify-certificate no; cd {current_year}; lcd {DOWNLOADS_PATH}; mirror {last_date_folder}; ls; bye"'
         execute(day_folder_entry_command)
 
+    return last_date_folder
 
 def a2_run(params):
     last_date_saved = params['current_folder']
-    ftp_mirror()
+    last_date_from_ftp = ftp_mirror(last_date_saved)
     time.sleep(1)
 
-    # uuid = get_uuid()
-    uuid=  ""
-    file_treatment(last_date_folder, os.listdir(f'{DOWNLOADS_PATH}{last_date_folder}'), uuid)
+    uuid = get_uuid()
+    if last_date_saved is None or int(last_date_saved) < last_date_from_ftp :
+        file_treatment(last_date_from_ftp, os.listdir(f'{DOWNLOADS_PATH}{last_date_from_ftp}'), uuid)
+
+        url = "http://127.0.0.1:5000/api/automation/2/update-params"
+
+        payload = json.dumps({
+        "params": {
+            "current_folder": last_date_from_ftp,
+            "feuil3_dict": feuil3_dict
+        }
+        })
+        headers = {
+        'Content-Type': 'application/json'
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+    else : 
+        print("up to date")
