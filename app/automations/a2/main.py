@@ -451,5 +451,6 @@ def a2_run(params):
         'Content-Type': 'application/json'
         }
         response = requests.request("POST", url, headers=headers, data=payload)
+        os.system(f'rm -rf {DOWNLOADS_PATH}{last_date_from_ftp}')
     else : 
         print("up to date")
