@@ -41,8 +41,8 @@
 
 <!-- Fenêtre statique pour signaler un problème -->
 <div id="problemWindow"
-    class="position-fixed top-50 start-50 translate-middle bg-light border rounded p-4 shadow-lg d-none"
-    style="z-index: 1050; max-width: 600px; width: 100%;">
+    class="position-fixed top-50 start-50 translate-middle bg-light border rounded p-4 shadow-lg d-none mx-auto"
+    style="z-index: 1050; max-width: 600px; width: 90%;">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Un problème ? Une question ? Faites-nous en part</h5>
         <button type="button" class="btn-close" id="closeProblemWindow" aria-label="Fermer"></button>
@@ -55,7 +55,7 @@
 
 <!-- Div affichant la variable total_earned_time -->
 <div class="d-flex justify-content-center align-items-center" style="height: 30vh;">
-    <div class="text-center px-3 py-2 position-relative w-50 rounded border border-info border-1 bg-white shadow-lg ">
+    <div class="text-center px-3 py-2 position-relative rounded border border-info border-1 bg-white shadow-lg ">
         <!-- Arrière-plan semi-transparent -->
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-info rounded" style="opacity: 0.5; z-index: -1;">
         </div>
@@ -64,6 +64,8 @@
         <p class="display-6 fw-medium">
             <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
             Temps total gagné
+            <span class="iconify" data-icon="flat-color-icons:flash-on" style="vertical-align: middle;"></span>
+
         </p>
 
         <p class="display-5 text-info fw-medium">{{ timer.get_total_time_saved() }}</p>
