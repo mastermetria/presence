@@ -1,193 +1,63 @@
-from enum import auto
-from flask import Flask, render_template, request, redirect, session, send_file, url_for, jsonify
-from flask_apscheduler import APScheduler
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-import secrets
-import json
+from flask import Flask, redirect, url_for
+from flask_migrate import Migrate
+
+from models import db
+
+from blueprints.admin import admin_bp
+from blueprints.auth import auth_bp
+from blueprints.automations import automation_bp
+from blueprints.api import api_bp
+from blueprints.test import test_bp
+
+from extensions import scheduler
+
+from dotenv import load_dotenv
 import os
-import io
-import subprocess
 
-from automations.a1.main import run as automat1  # Importation des scripts d'automatisation
-from automations.a2.main import run as automat2  # Importation des scripts d'automatisation
 
-# Configuration pour APScheduler
+load_dotenv()
+
+DEBUG_MODE = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+APP_PORT = int(os.getenv('APP_PORT', 5000))
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 class Config:
     SCHEDULER_API_ENABLED = True
-
-app = Flask(__name__)
-app.config.from_object(Config)
-
-scheduler = APScheduler()
-scheduler.init_app(app)
-scheduler.start()
-
-app.secret_key = "une longue phrase qui sert à je ne sais pas quoi"
-PASSWORD = "presence123*"
+    SECRET_KEY = os.getenv('SECRET_KEY')
 
 
-with open('db.json', 'r') as file:
-        db_data = json.load(file)
-        automations = db_data.get('automations')
+
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config.from_object(Config)
+
+    db.init_app(app)
+    Migrate(app, db)
+
+    # Initialiser APScheduler
+    scheduler.init_app(app)
+    scheduler.start()
+
+    # Enregistrer les Blueprints
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(automation_bp)
+    app.register_blueprint(api_bp)
+    app.register_blueprint(test_bp)
+
+    return app
 
 
-# Route pour afficher la page admin
-@app.route('/admin', methods=['GET', 'POST'])
-def admin():
-    # Charger le fichier JSON
-    with open('db.json', 'r') as f:
-        data = json.load(f)
+# Initialisation de l'application
+app = create_app()
 
-    if request.method == 'POST':
-        # Récupérer les données modifiées depuis le formulaire
-        updated_data = request.form.get('updated_data')
-        
-        try:
-            # Sauvegarder les nouvelles données dans le fichier JSON
-            with open('db.json', 'w') as f:
-                json.dump(json.loads(updated_data), f, indent=4)
-            return jsonify({"success": True, "message": "Données sauvegardées avec succès."})
-        except Exception as e:
-            return jsonify({"success": False, "message": f"Erreur : {str(e)}"}), 400
-
-    # Renvoyer la page HTML avec les données actuelles
-    return render_template('admin.html', data=json.dumps(data, indent=4))
-
-
-# Page de connexion
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None  # Variable pour stocker les erreurs
-    
-    # Vérifie si l'utilisateur est déjà authentifié
-    if session.get('authenticated'):
-        return redirect(url_for('index'))
-    
-    if request.method == 'POST':
-        if request.form.get('password') == PASSWORD:
-            session['authenticated'] = True
-            return redirect(url_for('index'))
-        else:
-            error = "Mot de passe incorrect !"  # Définit le message d'erreur
-    
-    return render_template('login/index.html', error=error, db_data=db_data)
-
-# Déconnexion
-@app.route('/logout')
-def logout():
-    session.pop('authenticated', None)
-    return redirect(url_for('login'))
-
-# Décorateur pour protéger les pages
-def login_required(f):
-    def wrapper(*args, **kwargs):
-        if not session.get('authenticated'):
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    wrapper.__name__ = f.__name__  # Nécessaire pour éviter des problèmes avec Flask
-    return wrapper
-
-
-def get_current_interval(id):
-    job = scheduler.get_job(id)
-    current_interval_seconds = job.trigger.interval.total_seconds() if job else None
-    current_interval_hours = current_interval_seconds / 3600 if current_interval_seconds else None
-
-    return current_interval_hours
-
-@app.route('/logs/<automation_index>')
-def get_logs(automation_index):
-    try:
-        with open('db.json', 'r') as f:
-            db_data = json.load(f)
-        f.close()
-        # Récupérer les logs dynamiquement selon l'ID
-        logs = db_data['automations'][int(automation_index)]['logs']
-        return jsonify(logs)
-    except KeyError:
-        return jsonify({"error": "Automation not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/')
-@login_required
+@app.route("/", methods=['GET'])
 def index():
-
-    return render_template('index.html',total_earned_time=float(automations[0]['time_saved'])+float(automations[1]['time_saved']), db=db_data)
-
-
-@app.route('/a1', methods=['GET', 'POST'])
-@login_required
-def a1_route():
-
-    return render_template('a1/index.html',time_saved=automations[0]['time_saved'], current_interval=get_current_interval(automations[0]['id']), automation=automations[0])
-
-
-@app.route('/a2', methods=['GET'])
-@login_required
-def a2_route():    
-    try :
-        excel_list = os.listdir('automations/a2/downloads/processed')
-    except : 
-        excel_list = []
-    return render_template('a2/index.html',time_saved=automations[1]['time_saved'], automation=automations[1], current_interval=get_current_interval(automations[1]['id']), excel_list=excel_list)
-
-
-@app.route('/test-selenium', methods=['GET'])
-def test_selenium():
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.chrome.options import Options
-    from webdriver_manager.chrome  import ChromeDriverManager
-
-    try:
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-        driver.get("https://www.google.com")
-        title = driver.title  # Obtenir le titre de la page
-        driver.quit()
-        return {"success": True, "title": title}, 200
-    except Exception as e:
-        return {"success": False, "error": str(e)}, 500
-
-
-@app.route('/check-lftp', methods=['GET'])
-def check_lftp():
-    try:
-        # Exécute la commande 'lftp --version' pour vérifier si lftp est installé
-        result = subprocess.run(['lftp', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if result.returncode == 0:
-            return jsonify({"status": "success", "message": "lftp is installed", "details": result.stdout.strip()})
-        else:
-            return jsonify({"status": "error", "message": "lftp is not installed or not found", "details": result.stderr.strip()})
-    except FileNotFoundError:
-        # Gestion de l'erreur si lftp n'est pas trouvé
-        return jsonify({"status": "error", "message": "lftp is not installed or not found"})
-    except Exception as e:
-        # Gestion d'autres erreurs éventuelles
-        return jsonify({"status": "error", "message": "An unexpected error occurred", "details": str(e)})
-
-
-@scheduler.task('interval', id=automations[0]['id'], hours=12, max_instances=1, misfire_grace_time=300)
-def a1():
-    automat1(automations[0]['last_document_number'])
-
-# @scheduler.task('interval', id=automations[1]['id'], seconds=30, max_instances=1, misfire_grace_time=300)
-# def a2():
-#     automat2()
-
-
-
-
+    return redirect(url_for('automation.home'))
 
 
 if __name__ == '__main__':
-
-    # Lancement de l'application Flask
-    app.run(debug=False, port=os.getenv("PORT", default=5000) )
+    print(DATABASE_URL)
+    app.run(debug=DEBUG_MODE, port=APP_PORT)

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Modifier l'Intervalle</title>
+<script>
+    const automation_index = 0;
+</script>
+
+<script src="{{ url_for('static', filename='js/update_interval.js') }}" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        font-family: 'Parkinsans', sans-serif;
+    }
+</style>
+
+<div class="container">
+    <h1 class="text-center my-5 display-4">Pannel de l'automatisation SRJ</h1>
+    <nav class="navbar">
+        <div class="container-fluid d-flex justify-content-end align-items-center gap-3">
+            <!-- Bouton Déconnexion -->
+            <a href="/automations/home" class="btn btn-dark" role="button">
+                Retourner Au Menu
+            </a>
+        </div>
+    </nav>
+</div>
+
+<br>
+
+
+<div class="container vh-100 mt-4">
+
+    <!-- Temps Gagné -->
+    <div class="mb-4 shadow-lg">
+        {% with timer=timer %}
+        {% include 'components/time_saved_displayer.html' %}
+        {% endwith %}
+    </div>
+
+    <!-- Grille Bootstrap -->
+    <div class="row w-100 ">
+        <!-- Partie gauche : Modification de l'intervalle -->
+        <div class="col-md-6 mb-4">
+            {% with current_interval=current_interval %}
+            {% include 'components/interval_modificator.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Partie droite : Terminal des logs -->
+        <div class="col-md-6">
+            {% with timer=timer, id=2%}
+            {% include 'components/monitor.html' %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

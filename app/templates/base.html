@@ -12,10 +12,11 @@
 </head>
 
 <body>
-    <!-- Div pour Particles.js -->
+    <!-- Div pour Particles.js    -->
+
     <div id="particles-js"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-color: black;"></div>
-    
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-color: azure;"></div>
+
     <!-- Contenu principal -->
     <div class="container" style="position: relative; z-index: 1;">
 
@@ -33,6 +34,7 @@
     
     <!-- Particles.js -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    
 <!-- Iconify.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/iconify/2.0.0/iconify.min.js"></script>
 
@@ -48,7 +50,7 @@
                     }
                 },
                 "color": {
-                    "value": "#ffffff" // Couleur des étoiles
+                    "value": "#FFA500" // Couleur des étoiles
                 },
                 "shape": {
                     "type": "circle", // Forme des étoiles
@@ -65,7 +67,7 @@
                     }
                 },
                 "size": {
-                    "value": 2, // Taille des étoiles
+                    "value": 4, // Taille des étoiles
                     "random": true // Taille aléatoire
                 },
                 "line_linked": {
@@ -97,6 +99,13 @@
             "retina_detect": true
         });
     </script>
+    <script>
+        const modal = document.getElementById('problemModal');
+        modal.addEventListener('hidden.bs.modal', function () {
+            document.body.classList.remove('modal-open');
+        });
+    </script>
+    
 </body>
 
 </html>

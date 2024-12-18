@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    .automation {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 150px;
+        margin-bottom: 10px;
+    }
+
+    button {
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    button.saveButton {
+        background-color: #007bff;
+    }
+</style>
+<script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+
+{% endblock %}
+
+{% block body %}
+<br><br>è
+<div id="automations-container">
+    <p>Loading automatisations...</p>
+</div>
+
+{% endblock %}

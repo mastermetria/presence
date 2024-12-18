@@ -1,4 +1,6 @@
-<div class="border border-white rounded p-4 bg-dark text-white text-center" style="--bs-bg-opacity: 0.8;">
-    <h2 class="display-6 mb-4">Temps Gagné</h2>
-    <p class="mb-0">Vous avez économisé : <strong>{{ time_saved }} heures</strong></p>
+<div class="border rounded p-3 text-center shadow-sm bg-white bg-opacity-50">
+  <h2 class="mb-2 fs-2">Temps Gagné</h2>
+  <p class="fs-1 mb-2 text-info">{{ timer.time_saved }}</p>
+  <p class="mb-1 fs-6">Depuis le</p>
+  <p class="fs-5 mb-0">{{ timer.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
 </div>
