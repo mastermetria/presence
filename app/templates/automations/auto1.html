@@ -21,9 +21,6 @@
     .row.w-100 {
         justify-content: space-between;
     }
-
-
-
 </style>
 <div class="container">
     <h1 class="text-center my-5 display-4">Pannel de l'automatisation {{automation.name}}</h1>
@@ -44,11 +41,11 @@
 
     <!-- Temps Gagné -->
     <div class="mb-4 shadow-lg">
-        {% with time_saved=time_saved %}
+        {% with timer=timer %}
         {% include 'components/time_saved_displayer.html' %}
         {% endwith %}
     </div>
-    
+
     <!-- Grille Bootstrap -->
     <div class="row w-100">
         <!-- Partie gauche : Modification de l'intervalle -->
@@ -60,7 +57,7 @@
 
         <!-- Partie droite : Terminal des logs -->
         <div class="col-md-6">
-            {% with timer=timer %}
+            {% with timer=timer, id=1 %}
             {% include 'components/monitor.html' %}
             {% endwith %}
         </div>

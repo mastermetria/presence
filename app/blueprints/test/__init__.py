@@ -2,7 +2,8 @@ from flask import Blueprint, render_template
 from models import Automation
 from automations.a1.main import a1_run
 from automations.a2.main import a2_run
-
+from automations.test.main import test_run
+from extensions import timer
 from dotenv import load_dotenv
 import requests
 import ast
@@ -14,9 +15,18 @@ APP_PORT = os.getenv('APP_PORT')
 test_bp = Blueprint('test', __name__, url_prefix='/test')
 
 @test_bp.route('/')
+def home():
+    total_time_saved = timer.get_total_time_saved()
+    creation_date = timer.get_creation_date()
+    all_stat = timer.get_all_stats()
+    return render_template('test/test.html', total_time_saved=total_time_saved, creation_date=creation_date, all_stat=all_stat)
+
+
+@test_bp.route('/test')
 def test():
 
-    return render_template('test/test.html')
+    test_run()
+    return 'OK'
 
 
 @test_bp.route('/a1')

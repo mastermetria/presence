@@ -24,7 +24,7 @@ def home():
     automations = Automation.query.all()
     total_earned_time = timer.get_total_time_saved()
     created_at = timer.get_creation_date()
-    return render_template('automations/home.html', total_earned_time=total_earned_time, automations=automations, created_at=created_at)
+    return render_template('automations/home.html',timer=timer, total_earned_time=total_earned_time, automations=automations, created_at=created_at)
 
 
 # Route pour A1
@@ -33,7 +33,7 @@ def a1_route():
 
     automation = Automation.query.get(1)  # Remplace 1 par l'ID correct
     job = scheduler.get_job(automation.id)
-    a1_timer = timer.get_function_stats('a1_run')
+    a1_timer = timer.get_function_stats('add_document_in_dext')
     return render_template('automations/auto1.html', timer=a1_timer, automation=automation)
 
 
@@ -45,7 +45,7 @@ def a2_route():
     except FileNotFoundError:
         excel_list = []
     automation = Automation.query.get(2)  # Remplace 2 par l'ID correct
-    a2_timer = timer.get_function_stats('a2_run')
+    a2_timer = timer.get_function_stats('file_treatment')
 
     return render_template('automations/auto2.html', timer=a2_timer, excel_list=excel_list, automation=automation)
 

@@ -116,7 +116,8 @@ def dext_initialize(driver):
     except :
         driver.back()
 
-@timer.track(time_saved=2.0)
+@timer.monitor()
+@timer.track(time_saved=2) 
 def add_document_in_dext(driver: webdriver.Chrome, path: str) :
     """
     Automates the process of adding a document in the Dext application.
@@ -282,7 +283,6 @@ def login(user, passwd, driver):
     login_button = driver.find_element(By.ID, 'login')
     login_button.click()
 
-@timer.monitor() 
 def a1_run (data) :
     chrome_options = Options()
     if not FLASK_DEBUG :

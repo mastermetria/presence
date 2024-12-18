@@ -1,32 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <script>
-        async function saveData() {
-            const updatedData = document.getElementById("jsonData").value;
+{% block head %}
+<style>
+    .automation {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
 
-            const response = await fetch("/admin", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `updated_data=${encodeURIComponent(updatedData)}`
-            });
+    textarea {
+        width: 100%;
+        height: 150px;
+        margin-bottom: 10px;
+    }
 
-            const result = await response.json();
-            alert(result.message);
-        }
-    </script>
-</head>
+    button {
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
 
-<body>
-    <h1>Admin Panel</h1>
-    <textarea id="jsonData" style="width: 100%; height: 300px;">{{ data }}</textarea>
-    <button onclick="saveData()">Sauvegarder</button>
-</body>
+    button.saveButton {
+        background-color: #007bff;
+    }
+</style>
+<script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
 
-</html>
+{% endblock %}
+
+{% block body %}
+<br><br>è
+<div id="automations-container">
+    <p>Loading automatisations...</p>
+</div>
+
+{% endblock %}

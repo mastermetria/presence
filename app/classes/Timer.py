@@ -14,7 +14,7 @@ class Timer:
     def track(self, time_saved):
         """
         Décorateur pour suivre les exécutions et le temps économisé.
-        :param time_saved: float, le temps économisé par exécution en heures.
+        :param time_saved: float, le temps économisé par exécution en minutes.
         """
         def decorator(func):
             @wraps(func)
@@ -43,14 +43,23 @@ class Timer:
         """
         Récupère les statistiques d'une fonction spécifique.
         :param func_name: str, le nom de la fonction.
-        :return: dict, avec le nombre d'exécutions, le temps économisé et la date du dernier lancement.
+        :return: dict, avec le nombre d'exécutions, le temps économisé formaté et la date du dernier lancement.
         """
+        time_saved_minutes = self.time_saved.get(func_name, 0.0)
+        hours, minutes = divmod(time_saved_minutes, 60)
+        
+        if hours > 0:
+            formatted_time_saved = f"{int(hours)} heures et {int(minutes)} minutes"
+        else:
+            formatted_time_saved = f"{int(minutes)} minutes"
+        
         return {
             "count": self.count.get(func_name, 0),
-            "time_saved": self.time_saved.get(func_name, 0.0),
+            "time_saved": formatted_time_saved,
             "last_run_date": self.last_run_date.get(func_name, None),
-            "created_at": self.created_at.strftime('%A %d %B %Y, %H:%M:%S')
+            "created_at": self.created_at
         }
+
 
     def get_all_stats(self):
         """
@@ -69,15 +78,21 @@ class Timer:
 
     def get_total_time_saved(self):
         """
-        Récupère le temps total économisé pour toutes les fonctions suivies.
-        :return: float, le temps total économisé.
+        Récupère le temps total économisé pour toutes les fonctions suivies,
+        formaté en heures et minutes si nécessaire.
+        :return: str, le temps total formaté.
         """
-        return sum(self.time_saved.values())
+        total_minutes = sum(self.time_saved.values())
+        hours, minutes = divmod(total_minutes, 60)
+        if hours > 0:
+            return f"{int(hours)} heures et {int(minutes)} minutes"
+        else:
+            return f"{int(minutes)} minutes"
 
     def get_creation_date(self):
         """
         Récupère la date de création de l'objet Timer.
         :return: str, la date de création formatée.
         """
-        return self.created_at.strftime('%Y-%m-%d')
+        return self.created_at.strftime('%d/%m/%Y')
 

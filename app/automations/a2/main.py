@@ -1,8 +1,6 @@
 from datetime import datetime
-
 import warnings
 import time
-from idna import encode
 import pandas as pd
 import subprocess
 import json
@@ -10,6 +8,8 @@ import re
 import os
 from dotenv import load_dotenv
 import requests
+
+from extensions import timer
 
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
@@ -22,36 +22,7 @@ SERVER = os.getenv('A2_FTP_SERVER')
 A2_PATH = './automations/a2/'
 DOWNLOADS_PATH = './automations/a2/downloads/'
 
-feuil3_dict = {
-    "CDE": ("604020000", "467100000"),
-    "CROIX-ROUGE": ("604021000", "467110000"),
-    "PASTEUR": ("604022000", "467120000"),
-    "MDM": ("604023000", "467130000"),
-    "WWF": ("604024000", "467140000"),
-    "UNHCR": ("604025000", "467150000"),
-    "ACTION FAIM": ("604026000", "467160000"),
-    "UNICEF": ("604027000", "467170000"),
-    "QUITOQUE": ("604028000", "467180000"),
-    "SOLIDARITES": ("604029000", "467190000"),
-    "CARE": ("604030000", "467200000"),
-    "ACTIONFAIM": ("604031000", "467210000"),
-    "EFS": ("604032000", "467220000"),
-}
-folder_dict = {
-    "APEX": ["APEX2", "TEST"],
-    "DAY 1": ["DAY1", "TEST"],
-    "DLG CORPORATION": ["DLGCORP", "TEST"],
-    "EMPOWER CORP": ["EMPOWER", "TEST"],
-    "EMPOWER": ["EMPOWER", "TEST"],
-    "GHEPARDO MARKETING": ["GHEPARDO", "TEST"],
-    "GHEPARDO": ["GHEPARDO", "TEST"],
-    "GRAVITY MARKETING": ["GRAVITY", "TEST"],
-    "KYS": ["KYS", "TEST"],
-    "REVIVAL": ["REVIVAL", "TEST"],
-    "REWARD PARTNERS": ["REWARDPAR", "TEST"],
-    "SLS DIVISION": ["SLSDIVISIO", "TEST"],
-    "VICTORY MARKETING": ["VICTORYMAR", "TEST"]
-}
+
 def get_uuid():
 
     url = "https://isuite.antaris.fr/CNX/api/v1/authentification"
@@ -87,10 +58,7 @@ def connect_to_folder(uuid, mc_name):
     'accept': 'text/plain',
     'UUID': uuid,
     }
-
     response = requests.request("POST", url, headers=headers, data=payload)
-
-    pass
 
 def create_provider_account(uuid, code, lib):
 
@@ -142,6 +110,7 @@ def verif_campaign_name(campaign_name, uuid):
     """
     # Obtenir les dernières valeurs du dictionnaire
     if not campaign_name in feuil3_dict :
+
         last_values = list(feuil3_dict.values())[-1]
         last_value_1 = int(last_values[0])
         last_value_2 = int(last_values[1])
@@ -162,7 +131,6 @@ def verif_campaign_name(campaign_name, uuid):
 
 def send_data(uuid, data):
     url = "https://isuite.antaris.fr/CNX/api/v1/compta/ecriture"
-
     payload = json.dumps(data)
     headers = {
     'accept': 'text/plain',
@@ -171,13 +139,21 @@ def send_data(uuid, data):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-
     print(f"Envoie des écritures : {response.text}")
-
-
-def file_treatment(max_nb, file_list, uuid):
     
-    for file in file_list[-2:-1]:
+    if 'ecritureNonEquilibre' in response.text :
+
+        total = sum(dic['Credit'] for dic in data['LignesEcriture'])
+        data['LignesEcriture'][0]['Debit'] = total  
+        
+        payload = json.dumps(data)
+        response = requests.request("POST", url, headers=headers, data=payload)
+        print(f"REEQUILIBRAGE : {response.text}")
+
+@timer.monitor()
+@timer.track(time_saved=205) 
+def file_treatment(max_nb, file_list, uuid):
+    for file in file_list:
         print(f'file name : {file}')
         df = pd.read_excel(f'{DOWNLOADS_PATH}{max_nb}/{file}',sheet_name='BA Payments New', header=None)
 
@@ -193,7 +169,8 @@ def file_treatment(max_nb, file_list, uuid):
         data = []
 
         if not df_filtered.empty :
-            
+            fournisseur_code = 'F409' if mc_name in ('APEX','EMPOWER') else 'F000'
+            print(fournisseur_code)
             connect_to_folder(uuid, mc_name)
             verif_campaign_name(campaign_name, uuid)
 
@@ -217,8 +194,8 @@ def file_treatment(max_nb, file_list, uuid):
                     "Compte": feuil3_dict[campaign_name][1],
                     "CodeTVA": "",
                     "Libelle": "PROVISION RETENUE 30%",
-                    "Credit": df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')] if df.iloc[15, col_to_num('AJ')]> 0 else 0,
-                    "Debit": -df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')] if df.iloc[15, col_to_num('AJ')]< 0 else 0,
+                    "Credit": round(df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')], 2) if df.iloc[15, col_to_num('AJ')]> 0 else 0,
+                    "Debit": round(-df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')], 2) if df.iloc[15, col_to_num('AJ')]< 0 else 0,
                     "ModeReglement": "",
                     "ReferenceGed": ""
                     }
@@ -229,8 +206,8 @@ def file_treatment(max_nb, file_list, uuid):
                     "Compte": feuil3_dict[campaign_name][0],
                     "CodeTVA": "",
                     "Libelle": "PROVISION RETENUE 30%",
-                    "Credit": -df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')] if df.iloc[15, col_to_num('AJ')]< 0 else 0,
-                    "Debit": df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')] if df.iloc[15, col_to_num('AJ')]> 0 else 0,
+                    "Credit": round(-df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')], 2) if df.iloc[15, col_to_num('AJ')]< 0 else 0,
+                    "Debit": round(df.iloc[15, col_to_num('AJ')] -df.iloc[15, col_to_num('AH')], 2) if df.iloc[15, col_to_num('AJ')]> 0 else 0,
                     "ModeReglement": "",
                     "ReferenceGed": ""
                     }
@@ -240,7 +217,7 @@ def file_treatment(max_nb, file_list, uuid):
             
             for _, row in df_filtered.iterrows():
 
-                create_provider_account(uuid, f'F000{row.iloc[col_to_num('C')]}', row.iloc[col_to_num('D')])
+                create_provider_account(uuid, f'{fournisseur_code}{row.iloc[col_to_num('C')]}', row.iloc[col_to_num('D')])
 
                 if campaign_type == 'FUNDRAISING':
                     fundraising_line1= {
@@ -309,7 +286,7 @@ def file_treatment(max_nb, file_list, uuid):
                         "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
-                        "Compte": f"F000{row.iloc[col_to_num('C')]}",
+                        "Compte": f"{fournisseur_code}{row.iloc[col_to_num('C')]}",
                         "CodeTVA": "",
                         "Libelle": f"{row.iloc[col_to_num('C')]} {row.iloc[col_to_num('D')]} commis. brutes",
                         "Credit": 0 if pd.isna(row.iloc[col_to_num('AS')]) else round(row.iloc[col_to_num('AS')], 2),
@@ -377,7 +354,7 @@ def file_treatment(max_nb, file_list, uuid):
                         "Jour": int(date.split('/')[1]),
                         "NumeroPiece": "",
                         "NumeroFacture": "",
-                        "Compte": f"F000{row.iloc[col_to_num('C')]}",
+                        "Compte": f"{fournisseur_code}{row.iloc[col_to_num('C')]}",
                         "CodeTVA": "",
                         "Libelle": f"{row[col_to_num('C')]} {row[col_to_num('D')]} commis. brutes",
                         "Credit": 0 if pd.isna(row.iloc[col_to_num('AQ')]) else round(row.iloc[col_to_num('AQ')], 2),
@@ -391,7 +368,6 @@ def file_treatment(max_nb, file_list, uuid):
 
         else : 
             print("fichier pas a traiter")
-
 
 
 def execute(command):  # function to execute command with subprocess
@@ -437,6 +413,11 @@ def a2_run(params):
 
     uuid = get_uuid()
     if last_date_saved is None or int(last_date_saved) < last_date_from_ftp :
+
+        global feuil3_dict, folder_dict 
+        feuil3_dict = params['feuil3_dict']
+        folder_dict = params['folder_dict']
+
         file_treatment(last_date_from_ftp, os.listdir(f'{DOWNLOADS_PATH}{last_date_from_ftp}'), uuid)
 
         url = "http://127.0.0.1:5000/api/automation/2/update-params"
@@ -444,7 +425,8 @@ def a2_run(params):
         payload = json.dumps({
         "params": {
             "current_folder": last_date_from_ftp,
-            "feuil3_dict": feuil3_dict
+            "feuil3_dict": feuil3_dict,
+            "folder_dict": folder_dict
         }
         })
         headers = {
@@ -452,5 +434,9 @@ def a2_run(params):
         }
         response = requests.request("POST", url, headers=headers, data=payload)
         os.system(f'rm -rf {DOWNLOADS_PATH}{last_date_from_ftp}')
+
+        feuil3_dict.clear()
+        folder_dict.clear()
+
     else : 
         print("up to date")
