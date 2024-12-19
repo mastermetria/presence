@@ -53,7 +53,7 @@ def connect_to_folder(uuid, mc_name):
 
     url = "https://isuite.antaris.fr/CNX/api/v1/sessions/dossier"
 
-    payload = json.dumps(mc_name)
+    payload = json.dumps(folder_dict.get(mc_name, ["TEST1", "TEST"])[0])
     headers = {
     'accept': 'text/plain',
     'UUID': uuid,
@@ -175,7 +175,7 @@ def file_treatment(max_nb, file_list, uuid):
             verif_campaign_name(campaign_name, uuid)
 
             body = {
-                "Journal": folder_dict[mc_name][1],
+                "Journal": folder_dict.get(mc_name, ["TEST1", "TEST"])[1],
                 "Mois": int(date.split('/')[0]),
                 "Annee": int(date.split('/')[2]),
                 "ReferenceGed": "",

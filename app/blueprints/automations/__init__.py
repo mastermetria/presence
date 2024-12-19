@@ -55,13 +55,19 @@ def a2_route():
 def a1_task():
     response = requests.get(F"http://localhost:{APP_PORT}/api/automation/1")
     data = response.json()  # Convertir la réponse JSON en dict
-    params = ast.literal_eval(data['params'])
+    # Vérifier si 'params' est une chaîne ou un dict
+    params = data['params']
 
+    if isinstance(params, str):  # Si c'est une chaîne, la convertir en dict
+        params = ast.literal_eval(params)
     a1_run(params['last_document_number'])
 
 @scheduler.task('interval', id='2', hours=100, max_instances=1, misfire_grace_time=300)
 def a2_task():
     response = requests.get(F"http://localhost:{APP_PORT}/api/automation/2")
     data = response.json()  # Convertir la réponse JSON en dict
-    params = ast.literal_eval(data['params'])
+
+    params = data['params']
+    if isinstance(params, str):  # Si c'est une chaîne, la convertir en dict
+        params = ast.literal_eval(params)    
     a2_run(params)
