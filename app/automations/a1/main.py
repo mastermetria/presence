@@ -285,7 +285,7 @@ def login(user, passwd, driver):
 
 def a1_run (data) :
     chrome_options = Options()
-    if not FLASK_DEBUG :
+    if FLASK_DEBUG == "False":
         chrome_options.add_argument('--headless=new')  # Activer le mode headless
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
