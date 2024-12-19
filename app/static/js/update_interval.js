@@ -13,20 +13,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             const intervalSpan = document.getElementById('task_interval');
 
             if (intervalSpan) {
-                let intervalText = '';
+                let intervalParts = [];
 
                 if (data.days && data.days > 0) {
-                    intervalText = `${data.days} jour${data.days > 1 ? 's' : ''}`;
-                } else if (data.hours && data.hours > 0) {
-                    intervalText = `${data.hours} heure${data.hours > 1 ? 's' : ''}`;
-                } else if (data.minutes && data.minutes > 0) {
-                    intervalText = `${data.minutes} minute${data.minutes > 1 ? 's' : ''}`;
-                } else {
-                    intervalText = 'Intervalle non spécifié';
+                    intervalParts.push(`${data.days} jour${data.days > 1 ? 's' : ''}`);
+                    console.log(data.days);
                 }
+
+                if (data.hours && data.hours > 0) {
+                    intervalParts.push(`${data.hours} heure${data.hours > 1 ? 's' : ''}`);
+                    console.log(data.hours);
+                }
+
+                if (data.minutes && data.minutes > 0) {
+                    intervalParts.push(`${data.minutes} minute${data.minutes > 1 ? 's' : ''}`);
+                    console.log(data.minutes);
+                }
+
+                let intervalText = intervalParts.length > 0 ? intervalParts.join(' et ') : 'Intervalle non spécifié';
 
                 intervalSpan.textContent = intervalText;
             }
+
         } catch (error) {
             console.error('Erreur:', error);
         }
@@ -38,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     form.addEventListener('submit', async function (event) {
         event.preventDefault();
-
+        console.log("update interval NOW")
         const formData = new FormData(this);
         const hours = formData.get('interval'); // Récupérer la valeur sélectionnée (en heures)
         const intervalInSeconds = parseInt(hours) * 3600; // Convertir les heures en secondes
